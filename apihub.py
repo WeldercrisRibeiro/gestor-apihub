@@ -1,7 +1,8 @@
 import sys
 import os
+import webbrowser
 import subprocess
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import (
     QDialog,
     QFormLayout,
@@ -219,6 +220,8 @@ class GerenciadorServicos(QtWidgets.QMainWindow):
         self.btnServico.clicked.connect(self.on_btn_servico_click)
         self.btnEditarEnv.clicked.connect(self.on_editar_env)
         self.btnAbrirLog.clicked.connect(self.abrir_log)
+        self.btnAbrirDash.clicked.connect(self.abrir_dash)
+        self.btnPainel.clicked.connect(self.abrir_painel)
 
         self.atualizar_status_servico()
 
@@ -508,6 +511,51 @@ QPushButton:hover{
             QtWidgets.QMessageBox.warning(
                 self, "Erro", f"Erro ao abrir arquivo de log:\n{e}"
             )
+
+    def abrir_dash(self):
+        """Abre o dashboard local no navegador padrão"""
+        url_dash = "http://127.0.0.1:3334/dashboard/"
+        try:
+            webbrowser.open(url_dash)
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(
+                self, "Erro", f"Erro ao abrir o dashboard:\n{e}"
+            )
+
+    def abrir_painel(self):
+        """Abre o Infarma Painel de Pedidos diretamente"""
+        localappdata = os.getenv("LOCALAPPDATA")
+        #print("LOCALAPPDATA:", localappdata)
+        if not localappdata:
+            QtWidgets.QMessageBox.warning(self, "Erro", "A variável LOCALAPPDATA não está definida.")
+            return
+
+        caminho_painel = os.path.join(
+        localappdata,
+        "Programs",
+        "Infarma Painel de Pedidos",
+        "Resources",
+        "app.asar.unpacked",
+        "config",
+        ".env"
+    )
+       # Programs\Infarma Painel de Pedidos\resources\app.asar.unpacked\config
+
+        try:
+            if os.path.exists(caminho_painel):
+                os.startfile(caminho_painel)
+                
+            else:
+                QtWidgets.QMessageBox.warning(
+                    self,
+                    "Erro",
+                    f"O ENV do Painel de Pedidos não foi encontrado em:\n{caminho_painel}",
+                )
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(
+                self, "Erro", f"Erro ao abrir o ENV Painel de Pedidos:\n{e}"
+            )
+
 
     def reset_aplicativo(self):
         """Reinicia o estado do aplicativo (como se tivesse acabado de abrir)."""

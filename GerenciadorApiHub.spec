@@ -30,7 +30,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='gerenciador-apiHub-2.1.5',
+    name='gerenciador-apiHub-2.1.6',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

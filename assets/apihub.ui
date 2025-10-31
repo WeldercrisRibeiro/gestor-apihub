@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>383</width>
-    <height>200</height>
+    <width>529</width>
+    <height>215</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -18,8 +18,8 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>383</width>
-    <height>200</height>
+    <width>550</width>
+    <height>500</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -30,7 +30,7 @@
     <property name="geometry">
      <rect>
       <x>60</x>
-      <y>140</y>
+      <y>10</y>
       <width>81</width>
       <height>16</height>
      </rect>
@@ -52,9 +52,9 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>10</y>
+      <y>30</y>
       <width>161</width>
-      <height>111</height>
+      <height>151</height>
      </rect>
     </property>
     <property name="whatsThis">
@@ -92,10 +92,10 @@ QPushButton:hover{
    <widget class="QPushButton" name="btnServico">
     <property name="geometry">
      <rect>
-      <x>200</x>
-      <y>10</y>
+      <x>190</x>
+      <y>30</y>
       <width>161</width>
-      <height>111</height>
+      <height>151</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -127,9 +127,9 @@ QPushButton:hover {
    <widget class="QPushButton" name="btnEditarEnv">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>150</y>
-      <width>101</width>
+      <x>380</x>
+      <y>30</y>
+      <width>131</width>
       <height>31</height>
      </rect>
     </property>
@@ -155,15 +155,15 @@ QPushButton:hover {
 </string>
     </property>
     <property name="text">
-     <string>🛠️   ENV</string>
+     <string>🛠️   ENV APIHUB</string>
     </property>
    </widget>
    <widget class="QPushButton" name="btnAbrirLog">
     <property name="geometry">
      <rect>
-      <x>260</x>
-      <y>150</y>
-      <width>101</width>
+      <x>380</x>
+      <y>70</y>
+      <width>131</width>
       <height>31</height>
      </rect>
     </property>
@@ -196,7 +196,7 @@ QPushButton:hover {
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>160</y>
+      <y>190</y>
       <width>51</width>
       <height>16</height>
      </rect>
@@ -218,7 +218,7 @@ QPushButton:hover {
     <property name="geometry">
      <rect>
       <x>70</x>
-      <y>160</y>
+      <y>190</y>
       <width>31</width>
       <height>16</height>
      </rect>
@@ -230,7 +230,7 @@ QPushButton:hover {
      </font>
     </property>
     <property name="text">
-     <string>2.1.5</string>
+     <string>2.1.6</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -240,7 +240,7 @@ QPushButton:hover {
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>140</y>
+      <y>10</y>
       <width>51</width>
       <height>16</height>
      </rect>
@@ -256,6 +256,74 @@ QPushButton:hover {
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnAbrirDash">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>120</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton {
+    background-color: rgb(0, 0, 0);   /* preto */
+    color: rgb(255, 255, 255);        /* branco */
+    font-weight: bold;
+    border-radius: 5px;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;        /* transição suave */
+}
+
+QPushButton:hover {
+    background-color: rgb(0, 50, 100);  /* azul escuro */
+    transform: scale(1.05);             /* leve zoom */
+    box-shadow: 
+        0 0 15px rgba(255, 255, 255, 0.2),  /* brilho sutil */
+        0 4px 10px rgba(0, 0, 0, 0.5);      /* profundidade */
+}
+</string>
+    </property>
+    <property name="text">
+     <string> DASHBOARD</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnPainel">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>160</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton {
+    background-color: rgb(0, 0, 0);   /* preto */
+    color: rgb(255, 255, 255);        /* branco */
+    font-weight: bold;
+    border-radius: 5px;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;        /* transição suave */
+}
+
+QPushButton:hover {
+    background-color: rgb(0, 50, 100);  /* azul escuro */
+    transform: scale(1.05);             /* leve zoom */
+    box-shadow: 
+        0 0 15px rgba(255, 255, 255, 0.2),  /* brilho sutil */
+        0 4px 10px rgba(0, 0, 0, 0.5);      /* profundidade */
+}
+</string>
+    </property>
+    <property name="text">
+     <string>🛠️   ENV PAINEL</string>
     </property>
    </widget>
   </widget>
