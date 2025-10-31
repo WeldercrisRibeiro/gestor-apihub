@@ -3,6 +3,7 @@ ULTIMO A PEGAR
 pyinstaller --onefile --noconsole --icon=C:\INFARMA\APIHUB\assets\apihub-white.ico  -n "GerenciadorApiHub" C:\Users\euwel\OneDrive\Documentos\WELDER\PROJETOS\apihub\apihub.py
 
 pyinstaller --onefile --noconsole --icon="C:\INFARMA\APIHUB\assets\apihub-white.ico" --add-data "C:\\INFARMA\\APIHUB\assets\apihub.ui" -n "GerenciadorApiHub" "C:\\Users\\euwel\\OneDrive\\Documentos\\WELDER\\PROJETOS\\apihub\\apihub.py"
+pyinstaller GerenciadorApiHub.spec
 
 
 pyinstaller --onefile --noconsole --icon=C:\APIHUB\assets\apihub-white.ico 
