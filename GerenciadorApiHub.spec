@@ -7,11 +7,8 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-        #-*-(r'C:\INFARMA\APIHUB\assets\apihub.ui', 'assets'),-*-
-        #-*-(r'C:\INFARMA\APIHUB\assets\apihub-white.ico', 'assets'),-*-
-
-        (r'C:\Users\euwel\OneDrive\Documentos\INFARMA\PIT\gerenciador-apihub\assets\apihub.ui', 'assets'),
-        (r'C:\Users\euwel\OneDrive\Documentos\INFARMA\PIT\gerenciador-apihub\assets\apihub-white.ico', 'assets'),
+        (r'C:\INFARMA\APIHUB\assets\apihub.ui', 'assets'),
+        (r'C:\INFARMA\APIHUB\assets\apihub-white.ico', 'assets'),
     ],
     hiddenimports=[],
     hookspath=[],
@@ -30,7 +27,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='gerenciador-apiHub-2.1.6',
+    name='gerenciador-apiHub-3.0.0',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

@@ -38,7 +38,8 @@ class EnvEditorDialog(QDialog):
         self.senha = QLineEdit()
 
         self.cod_vendedor = QLineEdit()
-        self.cod_servico = QLineEdit()
+        self.cod_produto_servico = QLineEdit()
+        self.cod_produto_entrega = QLineEdit()
         self.pagamento_entrega = QLineEdit()
         self.pagamento_online = QLineEdit()
         self.email = QLineEdit()
@@ -49,7 +50,8 @@ class EnvEditorDialog(QDialog):
         layout.addRow(QLabel("USUARIO"), self.usuario)
         layout.addRow(QLabel("SENHA"), self.senha)
         layout.addRow(QLabel("COD_VENDEDOR"), self.cod_vendedor)
-        layout.addRow(QLabel("COD_SERVICO"), self.cod_servico)
+        layout.addRow(QLabel("COD_PRODUTO_SERVICO"), self.cod_produto_servico)
+        layout.addRow(QLabel("COD_PRODUTO_ENTREGA"), self.cod_produto_entrega)
         layout.addRow(QLabel("PAGAMENTO_ENTREGA"), self.pagamento_entrega)
         layout.addRow(QLabel("PAGAMENTO_ONLINE"), self.pagamento_online)
         layout.addRow(QLabel("EMAIL"), self.email)
@@ -107,8 +109,10 @@ class EnvEditorDialog(QDialog):
                             self.hostname.setText(val)
                     elif key == "COD_VENDEDOR":
                         self.cod_vendedor.setText(val)
-                    elif key == "COD_SERVICO":
-                        self.cod_servico.setText(val)
+                    elif key == "COD_PRODUTO_SERVICO":
+                        self.cod_produto_servico.setText(val)
+                    elif key == "COD_PRODUTO_ENTREGA":
+                        self.cod_produto_entrega.setText(val)
                     elif key == "PAGAMENTO_ENTREGA":
                         self.pagamento_entrega.setText(val)
                     elif key == "PAGAMENTO_ONLINE":
@@ -141,9 +145,10 @@ class EnvEditorDialog(QDialog):
             composed = ";".join(parts)
             out["DATABASE_URL"] = f'"{composed}"'
 
-        out["COD_VENDEDOR"] = self.cod_vendedor.text() or "1"
-        out["COD_SERVICO"] = self.cod_servico.text() or "1"
-        out["PAGAMENTO_ENTREGA"] = self.pagamento_entrega.text() or "1"
+        out["COD_VENDEDOR"] = self.cod_vendedor.text() or ""
+        out["COD_PRODUTO_SERVICO"] = self.cod_produto_servico.text() or ""
+        out["COD_PRODUTO_ENTREGA"] = self.cod_produto_entrega.text() or ""
+        out["PAGAMENTO_ENTREGA"] = self.pagamento_entrega.text() or ""
         out["PAGAMENTO_ONLINE"] = self.pagamento_online.text() or "1"
         out["EMAIL"] = self.email.text() or ""
         return out
@@ -368,10 +373,11 @@ QPushButton:hover{
         TIME_LOG=168
 
         DATABASE_URL="sqlserver://HOSTNAME:PORTA;database=BANCO;user=USUARIO;password=SENHA;trustServerCertificate=true"
-        COD_VENDEDOR=1
-        COD_SERVICO=1
-        PAGAMENTO_ENTREGA=1
-        PAGAMENTO_ONLINE=1
+        COD_VENDEDOR=
+        COD_PRODUTO_SERVICO=
+        COD_PRODUTO_ENTREGA=
+        PAGAMENTO_ENTREGA=
+        PAGAMENTO_ONLINE=
         EMAIL=
 
         DIAS_PROCESSA_PEDIDO=5
