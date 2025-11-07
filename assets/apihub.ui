@@ -6,24 +6,24 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>529</width>
-    <height>215</height>
+    <width>621</width>
+    <height>178</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>529</width>
-    <height>215</height>
+    <width>621</width>
+    <height>100</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>529</width>
-    <height>215</height>
+    <width>621</width>
+    <height>500</height>
    </size>
   </property>
   <property name="windowTitle">
-   <string>Gerenciador Apihub 25.02</string>
+   <string>Gerenciador Apihub 25.03</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QLabel" name="lblStatusServico">
@@ -53,8 +53,8 @@
      <rect>
       <x>20</x>
       <y>30</y>
-      <width>161</width>
-      <height>151</height>
+      <width>121</width>
+      <height>111</height>
      </rect>
     </property>
     <property name="whatsThis">
@@ -92,10 +92,10 @@ QPushButton:hover{
    <widget class="QPushButton" name="btnServico">
     <property name="geometry">
      <rect>
-      <x>190</x>
+      <x>150</x>
       <y>30</y>
-      <width>161</width>
-      <height>151</height>
+      <width>121</width>
+      <height>111</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -127,9 +127,9 @@ QPushButton:hover {
    <widget class="QPushButton" name="btnEditarEnv">
     <property name="geometry">
      <rect>
-      <x>380</x>
+      <x>290</x>
       <y>30</y>
-      <width>131</width>
+      <width>151</width>
       <height>31</height>
      </rect>
     </property>
@@ -161,9 +161,9 @@ QPushButton:hover {
    <widget class="QPushButton" name="btnAbrirLog">
     <property name="geometry">
      <rect>
-      <x>380</x>
+      <x>290</x>
       <y>70</y>
-      <width>131</width>
+      <width>151</width>
       <height>31</height>
      </rect>
     </property>
@@ -196,7 +196,7 @@ QPushButton:hover {
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>190</y>
+      <y>150</y>
       <width>51</width>
       <height>16</height>
      </rect>
@@ -218,7 +218,7 @@ QPushButton:hover {
     <property name="geometry">
      <rect>
       <x>70</x>
-      <y>190</y>
+      <y>150</y>
       <width>31</width>
       <height>16</height>
      </rect>
@@ -230,7 +230,7 @@ QPushButton:hover {
      </font>
     </property>
     <property name="text">
-     <string>3.0.0</string>
+     <string>3.2.0</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -261,9 +261,9 @@ QPushButton:hover {
    <widget class="QPushButton" name="btnAbrirDash">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>120</y>
-      <width>131</width>
+      <x>290</x>
+      <y>110</y>
+      <width>151</width>
       <height>31</height>
      </rect>
     </property>
@@ -295,9 +295,9 @@ QPushButton:hover {
    <widget class="QPushButton" name="btnPainel">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>160</y>
-      <width>131</width>
+      <x>450</x>
+      <y>30</y>
+      <width>151</width>
       <height>31</height>
      </rect>
     </property>
@@ -324,6 +324,74 @@ QPushButton:hover {
     </property>
     <property name="text">
      <string>🛠️   ENV PAINEL</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnLogAll">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>70</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton {
+    background-color: rgb(0, 0, 0);   /* preto */
+    color: rgb(255, 255, 255);        /* branco */
+    font-weight: bold;
+    border-radius: 5px;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;        /* transição suave */
+}
+
+QPushButton:hover {
+    background-color: rgb(0, 50, 100);  /* azul escuro */
+    transform: scale(1.05);             /* leve zoom */
+    box-shadow: 
+        0 0 15px rgba(255, 255, 255, 0.2),  /* brilho sutil */
+        0 4px 10px rgba(0, 0, 0, 0.5);      /* profundidade */
+}
+</string>
+    </property>
+    <property name="text">
+     <string> LOG ALL PAINEL</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnLogErr">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>110</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton {
+    background-color: rgb(0, 0, 0);   /* preto */
+    color: rgb(255, 255, 255);        /* branco */
+    font-weight: bold;
+    border-radius: 5px;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;        /* transição suave */
+}
+
+QPushButton:hover {
+    background-color: rgb(0, 50, 100);  /* azul escuro */
+    transform: scale(1.05);             /* leve zoom */
+    box-shadow: 
+        0 0 15px rgba(255, 255, 255, 0.2),  /* brilho sutil */
+        0 4px 10px rgba(0, 0, 0, 0.5);      /* profundidade */
+}
+</string>
+    </property>
+    <property name="text">
+     <string>LOG ERRO PAINEL</string>
     </property>
    </widget>
   </widget>

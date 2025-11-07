@@ -14,58 +14,188 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets, uic, QtGui
 import pyodbc
+from PyQt5.QtWidgets import QGridLayout , QHBoxLayout
 
 
 class EnvEditorDialog(QDialog):
-    """Diálogo simples para editar as chaves do .env solicitadas pelo usuário."""
-
+    
     def __init__(self, env_path, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Editar configurações")
         self.env_path = env_path
 
         try:
-            self.resize(100, 200)
-            self.setMinimumWidth(300)
+            # Largura/Altura da janela
+            self.setMinimumWidth(600)
+            self.setMaximumWidth(600)
+            self.setMaximumHeight(300)
+            self.setMinimumHeight(300)
         except Exception:
             pass
 
-        layout = QFormLayout(self)
+        # 1. Crie o layout principal (QGridLayout)
+        layout = QGridLayout(self)
 
+        # 2. Crie todos os widgets ANTES de adicioná-los ao layout
+        # DADOS DE CONEXÃO
         self.hostname = QLineEdit()
         self.porta = QLineEdit()
         self.banco = QLineEdit()
         self.usuario = QLineEdit()
         self.senha = QLineEdit()
 
+        # CÓDIGOS E PAGAMENTOS
         self.cod_vendedor = QLineEdit()
         self.cod_produto_servico = QLineEdit()
         self.cod_produto_entrega = QLineEdit()
         self.pagamento_entrega = QLineEdit()
         self.pagamento_online = QLineEdit()
-        self.email = QLineEdit()
+        self.email = QLineEdit() 
 
-        layout.addRow(QLabel("HOSTNAME"), self.hostname)
-        layout.addRow(QLabel("PORTA"), self.porta)
-        layout.addRow(QLabel("BANCO"), self.banco)
-        layout.addRow(QLabel("USUARIO"), self.usuario)
-        layout.addRow(QLabel("SENHA"), self.senha)
-        layout.addRow(QLabel("COD_VENDEDOR"), self.cod_vendedor)
-        layout.addRow(QLabel("COD_PRODUTO_SERVICO"), self.cod_produto_servico)
-        layout.addRow(QLabel("COD_PRODUTO_ENTREGA"), self.cod_produto_entrega)
-        layout.addRow(QLabel("PAGAMENTO_ENTREGA"), self.pagamento_entrega)
-        layout.addRow(QLabel("PAGAMENTO_ONLINE"), self.pagamento_online)
-        layout.addRow(QLabel("EMAIL"), self.email)
-        
+        # ------------------------------------------------------------------
+        # ORGANIZAÇÃO EM GRADE (4 COLUNAS) - O seu código existente
+        # ------------------------------------------------------------------
+
+        linha = 0
+        # Linha 0
+        layout.addWidget(QLabel("HOSTNAME"), linha, 0)
+        layout.addWidget(self.hostname, linha, 1)
+        layout.addWidget(QLabel("COD_VENDEDOR"), linha, 2)
+        layout.addWidget(self.cod_vendedor, linha, 3)
+
+        linha += 1
+        # Linha 1
+        layout.addWidget(QLabel("PORTA"), linha, 0)
+        layout.addWidget(self.porta, linha, 1)
+        layout.addWidget(QLabel("COD_PRODUTO_SERVICO"), linha, 2)
+        layout.addWidget(self.cod_produto_servico, linha, 3)
+
+        linha += 1
+        # Linha 2
+        layout.addWidget(QLabel("BANCO"), linha, 0)
+        layout.addWidget(self.banco, linha, 1)
+        layout.addWidget(QLabel("COD_PRODUTO_ENTREGA"), linha, 2)
+        layout.addWidget(self.cod_produto_entrega, linha, 3)
+
+        linha += 1
+        # Linha 3
+        layout.addWidget(QLabel("USUARIO"), linha, 0)
+        layout.addWidget(self.usuario, linha, 1)
+        layout.addWidget(QLabel("PAGAMENTO_ENTREGA"), linha, 2)
+        layout.addWidget(self.pagamento_entrega, linha, 3)
+
+        linha += 1
+        # Linha 4
+        layout.addWidget(QLabel("SENHA"), linha, 0)
+        layout.addWidget(self.senha, linha, 1)
+        layout.addWidget(QLabel("PAGAMENTO_ONLINE"), linha, 2)
+        layout.addWidget(self.pagamento_online, linha, 3)
+
+        # ------------------------------------------------------------------
+        # CAMPO EMAIL (Ocupando as 4 colunas no final)
+        # ------------------------------------------------------------------
+
+        linha += 1
+        # Rótulo na Coluna 0
+        layout.addWidget(QLabel("EMAIL"), linha, 0)
+        # Campo de Texto se estendendo por 3 colunas (1, 2, 3)
+        layout.addWidget(self.email, linha, 1, 1, 3)
+
+        # ------------------------------------------------------------------
+        # DICAS DE LAYOUT
+        # ------------------------------------------------------------------
+        # Faz com que as colunas dos campos (1 e 3) ocupem o espaço disponível
+        layout.setColumnStretch(1, 1)
+        layout.setColumnStretch(3, 1)
+
+        self.setStyleSheet("""
+        QLineEdit {
+            border-radius: 5px; /* Arredondamento */
+            padding: 5px;
+            border: 1px solid #cccccc; /* Para que a borda arredondada seja visível */
+        }
+        """)
+
+        # ------------------------------------------------------------------
+        # SEÇÃO DE BOTÕES CORRIGIDA PARA ALINHAMENTO À DIREITA
+        # ------------------------------------------------------------------
+
+        # Botão Testar Conexão (Criado separadamente para estilizacao e alinhamento)
         self.btnTestar = QtWidgets.QPushButton("Testar Conexão")
+        self.btnTestar.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #45A049;
+            }
+            QPushButton:pressed {
+                background-color: #3E8E41;
+            }
+        """)
         self.btnTestar.clicked.connect(self.testar_conexao)
-        layout.addRow(self.btnTestar)
 
 
+        # QDialogButtonBox (Contém OK/Salvar e Cancel/Sair)
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
-        layout.addRow(buttons)
+
+        # Estilizar e renomear os botões internos
+        ok_button = buttons.button(QDialogButtonBox.Ok)
+        if ok_button:
+            ok_button.setText("Salvar")
+            # Estilo Salvar (Mantém o verde)
+            ok_button.setStyleSheet(self.btnTestar.styleSheet()) # Reusa o estilo verde
+
+        cancel_button = buttons.button(QDialogButtonBox.Cancel)
+        if cancel_button:
+            cancel_button.setText("Sair")
+            # Estilo Sair (Cor neutra/vermelha para contraste e visual do botão original)
+            cancel_button.setStyleSheet("""
+                QPushButton {
+                    /* Cor cinza claro para o botão "Sair" */
+                    background-color: #f0f0f0; 
+                    color: black;
+                    padding: 10px 20px;
+                    border: 1px solid #cccccc;
+                    border-radius: 5px;
+                    font-size: 14px;
+                    font-weight: normal;
+                }
+                QPushButton:hover {
+                    background-color: #e0e0e0; 
+                }
+                QPushButton:pressed {
+                    background-color: #cccccc;
+                }
+            """)
+
+
+        # NOVO: Crie um Layout Horizontal para a linha dos botões
+        botoes_layout = QtWidgets.QHBoxLayout()
+
+        # 1. Adicione o botão da esquerda
+        botoes_layout.addWidget(self.btnTestar)
+
+        # 2. Adicione um espaçador expansível
+        # ISSO EMPURRA OS WIDGETS SUBSEQUENTES PARA A DIREITA
+        botoes_layout.addStretch(1) 
+
+        # 3. Adicione o QDialogButtonBox (Salvar e Sair)
+        botoes_layout.addWidget(buttons)
+
+        # 4. Adicione o QHBoxLayout na linha final do QGridLayout
+        linha += 1
+        # Linha, Coluna, Linhas a Abranger, Colunas a Abranger
+        layout.addLayout(botoes_layout, linha, 0, 1, 4)
+
 
         self._load_values()
         
@@ -76,7 +206,7 @@ class EnvEditorDialog(QDialog):
         user = self.usuario.text().strip()
         pwd = self.senha.text().strip()
 
-        if not host or not db or not user:
+        if not host or not db or not pwd or not user:
             QtWidgets.QMessageBox.warning(
                 self, "Erro", "Por favor, preencha os dados para testar a conexão."
             )
@@ -89,7 +219,8 @@ class EnvEditorDialog(QDialog):
             conn.close()
             QtWidgets.QMessageBox.information(self, "Sucesso", "Conexão bem-sucedida!")
         except Exception as e:
-            QtWidgets.QMessageBox.warning(self, "Erro", f"Falha na conexão:\n{e}")
+            #QtWidgets.QMessageBox.warning(self, "Erro", f"Falha na conexão:\n{e}")
+            QtWidgets.QMessageBox.warning(self, "Erro", f"Erro na conexão! Verifique os dados informados e tente novamente.")  
 
     def _load_values(self):
         try:
@@ -187,10 +318,11 @@ class GerenciadorServicos(QtWidgets.QMainWindow):
         super().__init__()
 
         if getattr(sys, "frozen", False):
-            self.base_dir = getattr(sys, "_MEIPASS", os.path.dirname(__file__))
+            self.base_dir = sys._MEIPASS  # Caminho temporário do PyInstaller
         else:
             self.base_dir = os.path.dirname(__file__)
 
+        # Carrega o arquivo .ui (interno ao exe)
         ui_path = os.path.join(self.base_dir, "assets", "apihub.ui")
         uic.loadUi(ui_path, self)
 
@@ -199,11 +331,12 @@ class GerenciadorServicos(QtWidgets.QMainWindow):
             "excluir": r"C:\\INFARMA\\APIHUB\\bats\\2-exclui-servicos.bat",
         }
 
-        exe_dir = (
-            os.path.dirname(sys.executable)
-            if getattr(sys, "frozen", False)
-            else self.base_dir
-        )
+        exe_dir = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else self.base_dir
+        
+        for key, path in self.bats.items():
+            if not os.path.exists(path):
+                print(f"Aviso: arquivo BAT não encontrado -> {path}")
+
         self.env_path = os.path.join(exe_dir, ".env")
 
         self.create_default_env_if_missing()
@@ -211,7 +344,9 @@ class GerenciadorServicos(QtWidgets.QMainWindow):
         icon_path = os.path.join(self.base_dir, "assets", "apihub-white.ico")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
-
+        
+        
+        
             # 🎨 ÍCONES DO SISTEMA
         style = self.style()
 
@@ -255,6 +390,8 @@ class GerenciadorServicos(QtWidgets.QMainWindow):
         self.btnAbrirLog.clicked.connect(self.abrir_log)
         self.btnAbrirDash.clicked.connect(self.abrir_dash)
         self.btnPainel.clicked.connect(self.abrir_painel)
+        self.btnLogErr.clicked.connect(self.abrir_painelLogError)
+        self.btnLogAll.clicked.connect(self.abrir_painelLogAll)
 
         self.atualizar_status_servico()
 
@@ -265,7 +402,8 @@ class GerenciadorServicos(QtWidgets.QMainWindow):
             self.instalar_servicos()
         elif status in ("Iniciado", "Não iniciado"):
             self.excluir_servicos()
-            self.reset_aplicativo()
+            #self.reset_aplicativo()
+            self.atualizar_status_servico()
         else:
             QtWidgets.QMessageBox.warning(
                 self, "Aviso", "Não foi possível determinar o status do serviço."
@@ -299,92 +437,92 @@ class GerenciadorServicos(QtWidgets.QMainWindow):
                 # cor normal = cor de hover; hover = tonalidade mais escura
                 self.btnServico.setStyleSheet(
                     """
-QPushButton {
-    color: rgb(255, 255, 255);
-    background-color:   rgb(217, 83,79);   
-	font-weight: bold;
-   	font-size:80px;
-    border-radius: 5px;
-    border: none;
-    padding: 10px;
-}
+                        QPushButton {
+                            color: rgb(255, 255, 255);
+                            background-color:   rgb(217, 83,79);   
+                            font-weight: bold;
+                            font-size:80px;
+                            border-radius: 5px;
+                            border: none;
+                            padding: 10px;
+                        }
 
 
-QPushButton:hover {
-    background-color: rgb(150, 57, 54); 
-    padding-top: 12px;  /* simula o botão afundando */
-}
-                """
-                )
+                        QPushButton:hover {
+                            background-color: rgb(150, 57, 54); 
+                            padding-top: 12px;  /* simula o botão afundando */
+                        }
+                                        """
+                                        )
             elif status == "Não iniciado" or status == "Não instalado":
                 self.lblStatusServico.setStyleSheet("color: gray; font-weight: bold;")
                 # cinza padrão e hover cinza mais escuro
                 self.btnServico.setStyleSheet(
                     """
-QPushButton {
-    color: rgb(255, 255, 255);
-    background-color:   rgb(140, 140, 140); 
-	font-weight: bold;
-   	font-size:80px;
-    border-radius: 5px;
-    border: none;
-    padding: 10px;
-}
+                        QPushButton {
+                            color: rgb(255, 255, 255);
+                            background-color:   rgb(140, 140, 140); 
+                            font-weight: bold;
+                            font-size:80px;
+                            border-radius: 5px;
+                            border: none;
+                            padding: 10px;
+                        }
 
 
 
-QPushButton:hover {
-    background-color: rgb(150, 57, 54); 
-    padding-top: 12px;  /* simula o botão afundando */
-}
-                """
-                )
+                        QPushButton:hover {
+                            background-color: rgb(150, 57, 54); 
+                            padding-top: 12px;  /* simula o botão afundando */
+                        }
+                                        """
+                                        )
 
         if hasattr(self, "btnInstalar"):
             if status == "Iniciado":
                 self.btnInstalar.setStyleSheet(
                     """
-                    QPushButton {
-    color: rgb(255, 255, 255);
-	
-	background-color: rgb(0, 197, 0);
-    font-weight: bold;
-   	font-size:80px;
-    border-radius: 5px;
-    border: none;
-    padding: 10px;
-}
- 
-}
-QPushButton:hover{
-    
-	background-color: rgb(0, 100, 0);
-    padding-top: 12px; 
-}
+                                        QPushButton {
+                        color: rgb(255, 255, 255);
+                        
+                        background-color: rgb(0, 197, 0);
+                        font-weight: bold;
+                        font-size:80px;
+                        border-radius: 5px;
+                        border: none;
+                        padding: 10px;
+                    }
+                    
+                    }
+                    QPushButton:hover{
+                        
+                        background-color: rgb(0, 100, 0);
+                        padding-top: 12px; 
+                    }
 
                 """
                 )
             elif status == "Não iniciado" or status == "Não instalado":
                 self.btnInstalar.setStyleSheet(
                     """
-QPushButton {
-    color: rgb(255, 255, 255);
-	
-	background-color: rgb(140, 140, 140);
-    font-weight: bold;
-   	font-size:80px;
-    border-radius: 5px;
-    border: none;
-    padding: 10px;
-}
+                    QPushButton {
+                        color: rgb(255, 255, 255);
+                        
+                        background-color: rgb(140, 140, 140);
+                        font-weight: bold;
+                        font-size:80px;
+                        border-radius: 5px;
+                        border: none;
+                        padding: 10px;
+                    }
 
- 
-}
-QPushButton:hover{
-    
-	background-color: rgb(0, 197, 0);
-    padding-top: 12px; 
-}
+                    
+                    }
+                    QPushButton:hover{
+                        
+                        background-color: rgb(0, 197, 0);
+                        padding-top: 12px; 
+                    }
                 """
                 )
 
@@ -516,7 +654,8 @@ QPushButton:hover{
     def instalar_servicos(self):
         try:
             self.executar_bat(self.bats["instalar"])
-            self.reset_aplicativo()  # 🔄 reinicia depois de instalar
+            #self.reset_aplicativo()  # 🔄 reinicia depois de instalar
+            self.atualizar_status_servico()
         except Exception as e:
             QtWidgets.QMessageBox.warning(
                 self, "Erro", f"Erro ao instalar serviços:\n{e}"
@@ -525,7 +664,8 @@ QPushButton:hover{
     def excluir_servicos(self):
         try:
             self.executar_bat(self.bats["excluir"])
-            self.reset_aplicativo()  # 🔄 reinicia depois de excluir
+            #self.reset_aplicativo()  # 🔄 reinicia depois de excluir
+            self.atualizar_status_servico()
         except Exception as e:
             QtWidgets.QMessageBox.warning(
                 self, "Erro", f"Erro ao excluir serviços:\n{e}"
@@ -590,27 +730,86 @@ QPushButton:hover{
                 self, "Erro", f"Erro ao abrir o ENV Painel de Pedidos:\n{e}"
             )
 
+    def abrir_painelLogError(self):
+        """Abre o Infarma Painel de Pedidos diretamente"""
+        localappdata = os.getenv("LOCALAPPDATA")
+        #print("LOCALAPPDATA:", localappdata)
+        if not localappdata:
+            QtWidgets.QMessageBox.warning(self, "Erro", "A variável LOCALAPPDATA não está definida.")
+            return
 
-    def reset_aplicativo(self):
-        """Reinicia o estado do aplicativo (como se tivesse acabado de abrir)."""
+        caminho_painel = os.path.join(
+        localappdata,
+        "Programs",
+        "Infarma Painel de Pedidos",
+        "logs"
+        "error.log"
+    )
+       # Programs\Infarma Painel de Pedidos\resources\app.asar.unpacked\config
+
         try:
-            # Atualiza o status do serviço
-            self.atualizar_status_servico()
-
-            # Recria o .env padrão se estiver corrompido ou vazio
-            if not os.path.exists(self.env_path) or os.path.getsize(self.env_path) == 0:
-                self.create_default_env_if_missing()
-
-            # Fecha e reabre a janela (simula reinício completo)
-            QtWidgets.QMessageBox.information(
-                self,
-                "Reiniciando",
-                "O aplicativo será reiniciado para aplicar as alterações.",
-            )
-            python = sys.executable
-            os.execl(python, python, *sys.argv)
+            if os.path.exists(caminho_painel):
+                os.startfile(caminho_painel)
+                
+            else:
+                QtWidgets.QMessageBox.warning(
+                    self,
+                    "Erro",
+                    f"O LOG do Painel de Pedidos não foi encontrado em:\n{caminho_painel}",
+                )
         except Exception as e:
-            QtWidgets.QMessageBox.warning(self, "Erro", f"Falha Catastrófica:\n{e}")
+            QtWidgets.QMessageBox.warning(
+                self, "Erro", f"Erro ao abrir o LOG Painel de Pedidos:\n{e}"
+            )
+            
+    def abrir_painelLogAll(self):
+        """Abre o Infarma Painel de Pedidos diretamente"""
+        localappdata = os.getenv("LOCALAPPDATA")
+        #print("LOCALAPPDATA:", localappdata)
+        if not localappdata:
+            QtWidgets.QMessageBox.warning(self, "Erro", "A variável LOCALAPPDATA não está definida.")
+            return
+
+        caminho_painel = os.path.join(
+        localappdata,
+        "Programs",
+        "Infarma Painel de Pedidos",
+        "logs",
+        "all.log"
+    )
+       # Programs\Infarma Painel de Pedidos\resources\app.asar.unpacked\config
+
+        try:
+            if os.path.exists(caminho_painel):
+                os.startfile(caminho_painel)
+                
+            else:
+                QtWidgets.QMessageBox.warning(
+                    self,
+                    "Erro",
+                    f"O LOG do Painel de Pedidos não foi encontrado em:\n{caminho_painel}",
+                )
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(
+                self, "Erro", f"Erro ao abrir o LOG Painel de Pedidos:\n{e}"
+            )
+            
+    # def reset_aplicativo(self):
+    #     """Reinicia o estado do aplicativo (como se tivesse acabado de abrir)."""
+    #     try:
+    #         # Atualiza o status do serviço
+    #         self.atualizar_status_servico()
+
+    #         # Fecha e reabre a janela (simula reinício completo)
+    #         QtWidgets.QMessageBox.information(
+    #             self,
+    #             "Reiniciando",
+    #             "O aplicativo será reiniciado para aplicar as alterações.",
+    #         )
+    #         python = sys.executable
+    #         os.execl(python, python, *sys.argv)
+    #     except Exception as e:
+    #         QtWidgets.QMessageBox.warning(self, "Erro", f"Falha Catastrófica:\n{e}")
 
 
 if __name__ == "__main__":
