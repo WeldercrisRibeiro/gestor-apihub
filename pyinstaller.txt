@@ -5,3 +5,6 @@ pyuic5 -x assets/apihub.ui -o apihub_ui.py
 
 
 pyinstaller --clean --onefile -w --icon="assets/apihub.ico" -n "gerenciador-apihub" main.py
+
+
+TESTAR CONVERSAO DE UI PARA PY SEMPRE
