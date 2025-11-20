@@ -2,20 +2,15 @@ import sys
 import os
 import webbrowser
 import subprocess
+import platform
 from assets.apihub_ui import Ui_GerenciadorServicos
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import (
-    QDialog,
-    QFormLayout,
-    QLineEdit,
-    QDialogButtonBox,
-    QLabel,
-    QStyle,
-)
+from PyQt5.QtWidgets import (QDialog,QLineEdit,QDialogButtonBox,QLabel)
 from PyQt5.QtGui import QIcon
-from PyQt5 import QtWidgets, uic, QtGui
+from PyQt5 import QtWidgets, QtGui
 import pyodbc
-from PyQt5.QtWidgets import QGridLayout , QHBoxLayout,QMessageBox
+from PyQt5.QtWidgets import QGridLayout,QMessageBox
+import ctypes
 
 
 class EnvEditorDialog(QDialog):
@@ -382,16 +377,16 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
             self.base_dir = os.path.dirname(__file__)
 
 
-        self.bats = {
-            "instalar": r"C:\\INFARMA\\APIHUB\\bats\\1-instala-servicos.bat",
-            "excluir": r"C:\\INFARMA\\APIHUB\\bats\\2-exclui-servicos.bat",
-        }
+        # self.bats = {
+        #     "instalar": r"C:\\INFARMA\\APIHUB\\bats\\1-instala-servicos.bat",
+        #     "excluir": r"C:\\INFARMA\\APIHUB\\bats\\2-exclui-servicos.bat",
+        # }
 
         exe_dir = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else self.base_dir
         
-        for key, path in self.bats.items():
-            if not os.path.exists(path):
-                print(f"Aviso: arquivo BAT não encontrado -> {path}")
+        #for key, path in self.bats.items():
+            #if not os.path.exists(path):
+               # print(f"Aviso: arquivo BAT não encontrado -> {path}")
                
 
         self.env_path = os.path.join(exe_dir, ".env")
@@ -441,7 +436,9 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
         self.btnServico.setIcon(QtGui.QIcon(colored_pixmap))
         self.btnServico.setIconSize(QtCore.QSize(50, 50))
 
-        self.btnInstalar.clicked.connect(self.instalar_servicos)
+        #self.btnInstalar.clicked.connect(self.instalar_servicos)
+        self.btnInstalar.clicked.connect(self.instalar_servicos_py)
+        
         self.btnServico.clicked.connect(self.on_btn_servico_click)
         self.btnEditarEnv.clicked.connect(self.on_editar_env)
         self.btnAbrirLog.clicked.connect(self.abrir_log)
@@ -456,10 +453,9 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
         status = self.verificar_status_servico()
 
         if status == "Não instalado":
-            self.instalar_servicos()
+            self.instalar_servicos_py() # Chama a nova função de instalação
         elif status in ("Iniciado", "Não iniciado"):
-            self.excluir_servicos()
-            #self.reset_aplicativo()
+            self.excluir_servicos_py() # Chama a nova função de exclusão
             self.atualizar_status_servico()
         else:
             QtWidgets.QMessageBox.warning(
@@ -687,37 +683,115 @@ IFOOD_USE_NEW_API=true
                 self, "Erro", f"Falha ao abrir configurações:\n{e}"
             )
 
-    def executar_bat(self, caminho_bat):
-        """Executa um arquivo .bat e exibe o resultado"""
+    def instalar_servicos_py(self):
+        # 1. Obter caminhos
+        nssm_path, vmd_api_hub_path, redis_path = self.get_service_paths()
+
+        # 2. Verificar existência dos executáveis (replicate a lógica do .bat)
+        if not os.path.exists(nssm_path):
+            QMessageBox.critical(self, "[ERRO]", f"nssm.exe não encontrado em {nssm_path}")
+            return
+        if not os.path.exists(vmd_api_hub_path):
+            QMessageBox.critical(self, "[ERRO]", f"vmd-api-hub.exe não encontrado em {vmd_api_hub_path}")
+            return
+        if not os.path.exists(redis_path):
+            QMessageBox.critical(self, "[ERRO]", f"redis-server.exe não encontrado em {redis_path}")
+            return
+
         try:
-            subprocess.run(caminho_bat, check=True, shell=True)
-            QtWidgets.QMessageBox.information(
-                self, "Sucesso", f"Processo concluído com sucesso."
-            )
+            # 3. Instalando serviços com nssm
+            self.set_status_servico("Instalando API...")
+            print("Instalando vmd-api-hub...")
+            subprocess.run([nssm_path, "install", "vmd-api-hub", vmd_api_hub_path],
+                        check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            
+            self.set_status_servico("Instalando Redis...")
+            print("Instalando redis-service...")
+            subprocess.run([nssm_path, "install", "redis-service", redis_path],
+                        check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+
+            # 4. Definindo para iniciar automaticamente
+            self.set_status_servico("Configurando auto-start...")
+            print("Configurando auto-start...")
+            subprocess.run([nssm_path, "set", "vmd-api-hub", "Start", "SERVICE_AUTO_START"],
+                        check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            subprocess.run([nssm_path, "set", "redis-service", "Start", "SERVICE_AUTO_START"],
+                        check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+
+            # 5. Iniciando serviços
+            self.set_status_servico("Iniciando serviços...")
+            print("Iniciando serviços...")
+            subprocess.run(["net", "start", "vmd-api-hub"],
+                        check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            subprocess.run(["net", "start", "redis-service"],
+                        check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+
+            self.set_status_servico("Iniciado")
+            QMessageBox.information(self, "Sucesso!", "Instalação finalizada com sucesso!")
+            self.atualizar_status_servico()
+
         except subprocess.CalledProcessError as e:
-            QtWidgets.QMessageBox.warning(
-                self, "Erro", f"Falha ao executar:\n{caminho_bat}\n\n{e}"
+            self.set_status_servico("Erro")
+            QMessageBox.critical(
+                self, "Erro de Comando",
+                "Falha ao executar comando. Verifique se o app está como administrador.\n\n"
+                f"Detalhes:\n{e}"
+            )
+        except Exception as e:
+            self.set_status_servico("Erro")
+            QMessageBox.critical(self, "Erro", f"Erro inesperado durante a instalação: {e}")
+
+
+    def excluir_servicos_py(self):
+        # 1. Obter caminhos
+        nssm_path, _, _ = self.get_service_paths()
+
+        # 2. Verificar existência do nssm
+        if not os.path.exists(nssm_path):
+            QMessageBox.critical(self, "[ERRO]", f"nssm.exe não encontrado em {nssm_path}")
+            return
+
+        try:
+            # 3. Parar serviços com net
+            self.set_status_servico("Parando serviços...")
+            print("Parando serviços...")
+            # net stop pode falhar se o serviço não estiver rodando, por isso sem check=True
+            subprocess.run(["net", "stop", "vmd-api-hub"], creationflags=subprocess.CREATE_NO_WINDOW)
+            subprocess.run(["net", "stop", "redis-service"], creationflags=subprocess.CREATE_NO_WINDOW)
+            
+            # 4. Remover serviços com nssm
+            self.set_status_servico("Removendo API...")
+            print("Removendo vmd-api-hub...")
+            subprocess.run(
+                [nssm_path, "remove", "vmd-api-hub", "confirm"],
+                check=True,
+                creationflags=subprocess.CREATE_NO_WINDOW
+            )
+            
+            self.set_status_servico("Removendo Redis...")
+            print("Removendo redis-service...")
+            subprocess.run(
+                [nssm_path, "remove", "redis-service", "confirm"],
+                check=True,
+                creationflags=subprocess.CREATE_NO_WINDOW
             )
 
-    def instalar_servicos(self):
-        try:
-            self.executar_bat(self.bats["instalar"])
-            #self.reset_aplicativo()  # 🔄 reinicia depois de instalar
+            self.set_status_servico("Removido")
+            QMessageBox.information(self, "Sucesso!", "Serviços removidos com sucesso!")
             self.atualizar_status_servico()
-        except Exception as e:
-            QtWidgets.QMessageBox.warning(
-                self, "Erro", f"Erro ao instalar serviços:\n{e}"
+            
+        except subprocess.CalledProcessError as e:
+            self.set_status_servico("Erro")
+            QMessageBox.critical(
+                self,
+                "Erro de Comando",
+                "Falha ao executar comando. Verifique se o app está como administrador.\n\n"
+                f"Detalhes:\n{e}"
             )
+        except Exception as e:
+            self.set_status_servico("Erro")
+            QMessageBox.critical(self, "Erro", f"Erro inesperado durante a remoção: {e}")
 
-    def excluir_servicos(self):
-        try:
-            self.executar_bat(self.bats["excluir"])
-            #self.reset_aplicativo()  # 🔄 reinicia depois de excluir
-            self.atualizar_status_servico()
-        except Exception as e:
-            QtWidgets.QMessageBox.warning(
-                self, "Erro", f"Erro ao excluir serviços:\n{e}"
-            )
 
     def abrir_log(self):
         """Abre o arquivo de log no programa padrão do sistema"""
@@ -842,6 +916,23 @@ IFOOD_USE_NEW_API=true
                 self, "Erro", f"Erro ao abrir o LOG Painel de Pedidos:\n{e}"
             )
             
+    def get_service_paths(self):
+        base_dir = r"C:\INFARMA\APIHUB"
+        
+        # 1. Detectar arquitetura
+        arch = platform.machine()
+        if arch.endswith("64"): # AMD64 ou outras arquiteturas de 64 bits
+            nssm_subdir = "win64"
+        else:
+            nssm_subdir = "win32"
+            
+        nssm_path = os.path.join(base_dir, "nssm", nssm_subdir, "nssm.exe")
+        vmd_api_hub_path = os.path.join(base_dir, "vmd-api-hub.exe")
+        redis_path = os.path.join(base_dir, "redis-server.exe")
+        
+        return nssm_path, vmd_api_hub_path, redis_path
+
+   
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     window = GerenciadorServicos()

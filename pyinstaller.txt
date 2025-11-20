@@ -6,6 +6,8 @@ C:\Users\Weldercris.ribeiro\Documents\INFARMA\PIT\gerenciador-apihub
 
 pyuic5 -x assets/apihub.ui -o apihub_ui.py
 
+pyuic5 --reverse apihub_ui.py -o apihub_recuperado.ui
+
 
 p
 yinstaller --clean --onefile -w --icon="assets/apihub.ico" -n "gerenciador-apihub" main.py

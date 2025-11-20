@@ -21,6 +21,7 @@ class Ui_GerenciadorServicos(object):
         self.centralwidget = QtWidgets.QWidget(GerenciadorServicos)
         self.centralwidget.setObjectName("centralwidget")
         self.lblStatusServico = QtWidgets.QLabel(self.centralwidget)
+        
         #self.lblStatusServico.setGeometry(QtCore.QRect(60, 10, 81, 16))
         self.lblStatusServico.setGeometry(QtCore.QRect(80, 10, 121, 16))
         self.lblStatusServico.setStyleSheet("")
