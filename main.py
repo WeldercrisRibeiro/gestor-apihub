@@ -54,37 +54,42 @@ class EnvEditorDialog(QDialog):
 
         linha = 0
         # Linha 0
-        layout.addWidget(QLabel("HOSTNAME"), linha, 0)
+        layout.addWidget(QLabel("Nome do Servidor"), linha, 0)
         layout.addWidget(self.hostname, linha, 1)
-        layout.addWidget(QLabel("COD_VENDEDOR"), linha, 2)
+        
+        layout.addWidget(QLabel("Vendedor Padrão"), linha, 2)
         layout.addWidget(self.cod_vendedor, linha, 3)
 
         linha += 1
         # Linha 1
-        layout.addWidget(QLabel("PORTA"), linha, 0)
+        layout.addWidget(QLabel("Porta"), linha, 0)
         layout.addWidget(self.porta, linha, 1)
-        layout.addWidget(QLabel("COD_PRODUTO_SERVICO"), linha, 2)
+        
+        layout.addWidget(QLabel("Produto do tipo 'Serviço' "), linha, 2)
         layout.addWidget(self.cod_produto_servico, linha, 3)
 
         linha += 1
         # Linha 2
-        layout.addWidget(QLabel("BANCO"), linha, 0)
+        layout.addWidget(QLabel("Banco de Dados"), linha, 0)
         layout.addWidget(self.banco, linha, 1)
-        layout.addWidget(QLabel("COD_PRODUTO_ENTREGA"), linha, 2)
+        
+        layout.addWidget(QLabel("Produto do tipo 'Entrega' "), linha, 2)
         layout.addWidget(self.cod_produto_entrega, linha, 3)
 
         linha += 1
         # Linha 3
-        layout.addWidget(QLabel("USUARIO"), linha, 0)
+        layout.addWidget(QLabel("Usuário"), linha, 0)
         layout.addWidget(self.usuario, linha, 1)
-        layout.addWidget(QLabel("PAGAMENTO_ENTREGA"), linha, 2)
+        
+        layout.addWidget(QLabel("Forma Pgto - Entrega"), linha, 2)
         layout.addWidget(self.pagamento_entrega, linha, 3)
 
         linha += 1
         # Linha 4
-        layout.addWidget(QLabel("SENHA"), linha, 0)
+        layout.addWidget(QLabel("Senha"), linha, 0)
         layout.addWidget(self.senha, linha, 1)
-        layout.addWidget(QLabel("PAGAMENTO_ONLINE"), linha, 2)
+        
+        layout.addWidget(QLabel("Forma Pgto - Aplicativo"), linha, 2)
         layout.addWidget(self.pagamento_online, linha, 3)
 
         # ------------------------------------------------------------------
@@ -93,7 +98,7 @@ class EnvEditorDialog(QDialog):
 
         linha += 1
         # Rótulo na Coluna 0
-        layout.addWidget(QLabel("EMAIL"), linha, 0)
+        layout.addWidget(QLabel("E-mail"), linha, 0)
         # Campo de Texto se estendendo por 3 colunas (1, 2, 3)
         layout.addWidget(self.email, linha, 1, 1, 3)
 
@@ -456,11 +461,9 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
             if "RUNNING" in result.stdout:
                 return "Iniciado"
             elif "STOPPED" in result.stdout:
-                return "Não iniciado"
-            elif "não existe" in result.stdout or "does not exist" in result.stdout:
-                return "Não instalado"
+                return "Parado"
             else:
-                return "Não iniciado"
+                return "Não instalado"
         except Exception:
             return "Erro"
 
@@ -469,16 +472,17 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
 
         if hasattr(self, "lblStatusServico"):
             self.lblStatusServico.setText(status)
-
+            
+        #label do status
         if hasattr(self, "btnServico"):
             if status == "Iniciado":
                 self.lblStatusServico.setStyleSheet("color: green; font-weight: bold;")
-                # cor normal = cor de hover; hover = tonalidade mais escura
+                
                 self.btnServico.setStyleSheet(
                     """
                         QPushButton {
                             color: rgb(255, 255, 255);
-                            background-color:   rgb(217, 83,79);   
+                            background-color:  red;   
                             font-weight: bold;
                             font-size:80px;
                             border-radius: 5px;
@@ -487,10 +491,7 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
                         }
 
 
-                        QPushButton:hover {
-                            background-color: rgb(150, 57, 54); 
-                            padding-top: 12px;  /* simula o botão afundando */
-                        }
+                        
                                         """
                                         )
             elif status == "Não iniciado" or status == "Não instalado":
@@ -507,24 +508,21 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
                             border: none;
                             padding: 10px;
                         }
-
-
-
-                        QPushButton:hover {
-                            background-color: rgb(150, 57, 54); 
-                            padding-top: 12px;  /* simula o botão afundando */
-                        }
                                         """
                                         )
 
+            elif status == "Erro" or status == "Erro":
+                self.lblStatusServico.setStyleSheet("color: red; font-weight: bold;")
+                
         if hasattr(self, "btnInstalar"):
+            #background-color: rgb(0, 197, 0);
             if status == "Iniciado":
                 self.btnInstalar.setStyleSheet(
                     """
-                                        QPushButton {
+                        QPushButton {
                         color: rgb(255, 255, 255);
                         
-                        background-color: rgb(0, 197, 0);
+                        background-color: #81f485;
                         font-weight: bold;
                         font-size:80px;
                         border-radius: 5px;
@@ -533,11 +531,7 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
                     }
                     
                     }
-                    QPushButton:hover{
-                        
-                        background-color: rgb(0, 100, 0);
-                        padding-top: 12px; 
-                    }
+                    
 
                 """
                 )
@@ -557,11 +551,7 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
 
                     
                     }
-                    QPushButton:hover{
-                        
-                        background-color: rgb(0, 197, 0);
-                        padding-top: 12px; 
-                    }
+                    
                 """
                 )
 

@@ -261,7 +261,7 @@ class Ui_GerenciadorServicos(object):
         )
         self.lblStatusServico.setToolTip(
             _translate(
-                "GerenciadorServicos", "<html><head/><body><p>Status:</p></body></html>"
+                "GerenciadorServicos", "<html><head/><body><p>Status do Serviço:</p></body></html>"
             )
         )
         self.lblStatusServico.setText(
