@@ -245,7 +245,7 @@ class Ui_GerenciadorServicos(object):
         self.btnEditarEnv.setText(_translate("GerenciadorServicos", "🛠️   ENV APIHUB"))
         self.btnAbrirLog.setText(_translate("GerenciadorServicos", "🗒️  LOG"))
         self.lblStatusServico_3.setText(_translate("GerenciadorServicos", "Versão:"))
-        self.lblStatusServico_4.setText(_translate("GerenciadorServicos", "3.3.1"))
+        self.lblStatusServico_4.setText(_translate("GerenciadorServicos", "4.0.0"))
         self.lblStatusServico_5.setText(_translate("GerenciadorServicos", "Status: "))
         self.btnAbrirDash.setText(_translate("GerenciadorServicos", " DASHBOARD"))
         self.btnPainel.setText(_translate("GerenciadorServicos", "🛠️   ENV PAINEL"))

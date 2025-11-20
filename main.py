@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets, uic, QtGui
 import pyodbc
-from PyQt5.QtWidgets import QGridLayout , QHBoxLayout
+from PyQt5.QtWidgets import QGridLayout , QHBoxLayout,QMessageBox
 
 
 class EnvEditorDialog(QDialog):
@@ -117,77 +117,42 @@ class EnvEditorDialog(QDialog):
         }
         """)
 
-        # ------------------------------------------------------------------
-        # SEÇÃO DE BOTÕES CORRIGIDA PARA ALINHAMENTO À DIREITA
-        # ------------------------------------------------------------------
-
-        # Botão Testar Conexão (Criado separadamente para estilizacao e alinhamento)
-        self.btnTestar = QtWidgets.QPushButton("Testar Conexão")
-        self.btnTestar.setStyleSheet("""
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                padding: 10px 20px;
-                border: none;
-                border-radius: 5px;
-                font-size: 14px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #45A049;
-            }
-            QPushButton:pressed {
-                background-color: #3E8E41;
-            }
-        """)
-        self.btnTestar.clicked.connect(self.testar_conexao)
 
 
         # QDialogButtonBox (Contém OK/Salvar e Cancel/Sair)
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok ) 
+                                   #QDialogButtonBox.Cancel)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
 
-        # Estilizar e renomear os botões internos
+        buttons.setCenterButtons(True)  # CENTRALIZA DENTRO DO BUTTONBOX
+
         ok_button = buttons.button(QDialogButtonBox.Ok)
+
         if ok_button:
             ok_button.setText("Salvar")
-            # Estilo Salvar (Mantém o verde)
-            ok_button.setStyleSheet(self.btnTestar.styleSheet()) # Reusa o estilo verde
-
-        cancel_button = buttons.button(QDialogButtonBox.Cancel)
-        if cancel_button:
-            cancel_button.setText("Sair")
-            # Estilo Sair (Cor neutra/vermelha para contraste e visual do botão original)
-            cancel_button.setStyleSheet("""
+            ok_button.setFixedSize(500, 35)  # tamanho que você colocou
+            ok_button.setStyleSheet("""
                 QPushButton {
-                    /* Cor cinza claro para o botão "Sair" */
-                    background-color: #f0f0f0; 
-                    color: black;
-                    padding: 10px 20px;
-                    border: 1px solid #cccccc;
-                    border-radius: 5px;
+                    background-color: #4CAF50;
+                    color: white;
+                    border: none;
+                    border-radius: 6px;
                     font-size: 14px;
-                    font-weight: normal;
+                    font-weight: bold;
                 }
                 QPushButton:hover {
-                    background-color: #e0e0e0; 
+                    background-color: #45A049;
                 }
                 QPushButton:pressed {
-                    background-color: #cccccc;
+                    background-color: #3E8E41;
                 }
             """)
 
 
+
         # NOVO: Crie um Layout Horizontal para a linha dos botões
         botoes_layout = QtWidgets.QHBoxLayout()
-
-        # 1. Adicione o botão da esquerda
-        botoes_layout.addWidget(self.btnTestar)
-
-        # 2. Adicione um espaçador expansível
-        # ISSO EMPURRA OS WIDGETS SUBSEQUENTES PARA A DIREITA
-        botoes_layout.addStretch(1) 
 
         # 3. Adicione o QDialogButtonBox (Salvar e Sair)
         botoes_layout.addWidget(buttons)
@@ -200,12 +165,102 @@ class EnvEditorDialog(QDialog):
 
         self._load_values()
         
+        
+    def validate_and_save(self):
+        # 1. Obter dados do formulário
+        host = self.hostname.text().strip()
+        port = self.porta.text().strip()
+        db = self.banco.text().strip()
+        user = self.usuario.text().strip()
+        pwd = self.senha.text().strip()
+
+        cod_vendedor = self.cod_vendedor.text().strip()
+        cod_produto_servico = self.cod_produto_servico.text().strip()
+        cod_produto_entrega = self.cod_produto_entrega.text().strip()
+        pagamento_entrega = self.pagamento_entrega.text().strip()
+        pagamento_online = self.pagamento_online.text().strip()
+
+        # 2. Verificar se os campos de conexão estão preenchidos
+        if not (host and db and user and pwd):
+            QMessageBox.warning(
+                self, "Erro de Validação", "Preencha todos os campos de conexão (HOSTNAME, BANCO, USUARIO, SENHA) antes de salvar."
+            )
+            return False
+
+        # 3. Verificar se todos os campos de código estão preenchidos
+        if not (cod_vendedor and cod_produto_servico and cod_produto_entrega and pagamento_entrega and pagamento_online):
+            QMessageBox.warning(
+                self, "Erro de Validação", "Preencha todos os códigos (Vendedor, Produtos e Pagamentos)."
+            )
+            return False
+        
+        conn = None
+        cursor = None
+        try:
+            # Tenta estabelecer a conexão
+            hostport = f"{host},{port}" if port else host
+            conn_str = f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={hostport};DATABASE={db};UID={user};PWD={pwd};TrustServerCertificate=yes"
+            conn = pyodbc.connect(conn_str, timeout=5)
+            cursor = conn.cursor()
+
+            # Estrutura de validação (Código, Tabela, Coluna, Mensagem de Erro)
+            validations = [
+                (cod_vendedor, "VENDE", "COD_VENDED", f"Vendedor (COD_VENDEDOR={cod_vendedor})"),
+                (cod_produto_servico, "PRODU", "COD_PRODUT", f"Produto Serviço (COD_PRODUTO_SERVICO={cod_produto_servico})"),
+                (cod_produto_entrega, "PRODU", "COD_PRODUT", f"Produto Entrega (COD_PRODUTO_ENTREGA={cod_produto_entrega})"),
+                (pagamento_entrega, "FPGCB", "COD_FORPAG", f"Pagamento Entrega (PAGAMENTO_ENTREGA={pagamento_entrega})"),
+                (pagamento_online, "FPGCB", "COD_FORPAG", f"Pagamento Online (PAGAMENTO_ONLINE={pagamento_online})"),
+            ]
+            
+            # Executa as validações
+            for value, table, column, error_msg in validations:
+                # Usa COUNT para verificar a existência de forma eficiente
+                query = f"SELECT COUNT(*) FROM {table} WHERE {column} = ?"
+                cursor.execute(query, value)
+                count = cursor.fetchone()[0]
+
+                if count == 0:
+                    QMessageBox.warning(
+                        self, "Erro de Validação", f"O código não foi encontrado no banco de dados:\n\n- {error_msg}"
+                    )
+                    return False # Falhou na validação
+
+            # Se chegou até aqui, todas as validações de código passaram
+            return True
+
+        except pyodbc.Error as e:
+            QMessageBox.critical(
+                self, "Erro de Conexão/SQL", f"Falha durante a validação no banco de dados. Verifique os dados de conexão ou as permissões:\n\n{e}"
+            )
+            return False # Falhou devido a erro de conexão/SQL
+        except Exception as e:
+            QMessageBox.critical(
+                self, "Erro Desconhecido", f"Ocorreu um erro inesperado durante a validação:\n\n{e}"
+            )
+            return False
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+
+    # Sobrescrever o método accept
+    def accept(self):
+        """
+        Sobrescreve o método accept (chamado pelo botão Salvar) para incluir a validação
+        antes de realmente aceitar e fechar o diálogo.
+        """
+        if self.validate_and_save():
+            # Chama o método original da classe base se a validação for bem-sucedida
+            super().accept()
+        
     def testar_conexao(self):
         host = self.hostname.text().strip()
         port = self.porta.text().strip()
         db = self.banco.text().strip()
         user = self.usuario.text().strip()
         pwd = self.senha.text().strip()
+        
 
         if not host or not db or not pwd or not user:
             QtWidgets.QMessageBox.warning(
@@ -226,7 +281,9 @@ class EnvEditorDialog(QDialog):
     def _load_values(self):
         try:
             if not os.path.exists(self.env_path):
+                print("Passou aqui")
                 return
+                
             with open(self.env_path, "r", encoding="utf-8") as f:
                 for raw in f:
                     line = raw.strip()
@@ -244,7 +301,7 @@ class EnvEditorDialog(QDialog):
                             if val.startswith("sqlserver://"):
                                 body = val[len("sqlserver://") :]
                                 if ";" in body:
-                                    hostport, rest = body.split(";", 1)
+                                    hostport, rest = body.split(";",1)
                                 else:
                                     hostport, rest = body, ""
                                 if ":" in hostport:
@@ -324,9 +381,6 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
         else:
             self.base_dir = os.path.dirname(__file__)
 
-        # Carrega o arquivo .ui (interno ao exe)
-        #ui_path = os.path.join(self.base_dir, "assets", "apihub.ui")
-       # uic.loadUi(ui_path, self)
 
         self.bats = {
             "instalar": r"C:\\INFARMA\\APIHUB\\bats\\1-instala-servicos.bat",
@@ -533,45 +587,36 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
         if os.path.exists(self.env_path):
             return
 
-        default_env = """
-        NODE_ENV=production
-        PORT=3334
-        REDIS_HOST=127.0.0.1
-        REDIS_PORT=6379
+        default_env = """NODE_ENV=production
+PORT=3334
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
 
-        TIME_LOG=168
+# Tempo para persistir o LOG em horas | default 7 * 24 = 168
+TIME_LOG=168
 
-        DATABASE_URL="sqlserver://HOSTNAME:PORTA;database=BANCO;user=USUARIO;password=SENHA;trustServerCertificate=true"
-        COD_VENDEDOR=
-        COD_PRODUTO_SERVICO=
-        COD_PRODUTO_ENTREGA=
-        PAGAMENTO_ENTREGA=
-        PAGAMENTO_ONLINE=
-        EMAIL=
+# BANCO DE DADOS PARA ACESSO
+DATABASE_URL="sqlserver://HOSTNAME:PORTA;database=BANCO;user=USUARIO;password=SENHA;trustServerCertificate=true"
+COD_VENDEDOR= #VENDEDOR PADRÃO PARA RECEBER OS PEDIDOS
+COD_PRODUTO_SERVICO= #PRODUTOS TIPO SERVIÇO PARA INCLUSÃO DE TAXAS
+COD_PRODUTO_ENTREGA= #PRODUTOS TIPO ENTREGA PARA INCLUSÃO DE TAXA DE ENTREGA
+PAGAMENTO_ENTREGA= #FORMA DE PAGAMENTO PARA ENTREGA / PAGAR NA ENTREGA
+PAGAMENTO_ONLINE= #FORMA DE PAGAMENTO PARA ONLINE / PAGAMENTO NA PLATAFORMA
+EMAIL= #EMAIL PARA ENVIO DE NOTIFICAÇÕES
 
-        DIAS_PROCESSA_PEDIDO=5
-        DIAS_CANCELA_PEDIDO=0
+# Dias para consulta de pedidos FastApp
+DIAS_PROCESSA_PEDIDO=5
+DIAS_CANCELA_PEDIDO=0
 
-        NAPP_ORDER_STATUS_FILTER=CONFIRMED
+NAPP_ORDER_STATUS_FILTER=CONFIRMED #STATUS DO PEDIDO PARA CONSULTA NAPP
 
-        IFOOD_ORDER_STATUS_FILTER=PLC
-        IFOOD_USE_NEW_API=true
+IFOOD_ORDER_STATUS_FILTER=PLC #STATUS DO PEDIDO PARA CONSULTA IFOOD
+IFOOD_USE_NEW_API=true 
         """
         os.makedirs(os.path.dirname(self.env_path), exist_ok=True)
         with open(self.env_path, "w", encoding="utf-8") as f:
             f.write(default_env)
 
-    # ---------- Funções ----------
-    def abrir_env(self):
-        """Abre o arquivo .env no editor padrão"""
-        try:
-            os.startfile(self.env_path)
-        except Exception as e:
-            QtWidgets.QMessageBox.warning(
-                self, "Erro", f"Não foi possível abrir o arquivo ENV:\n{e}"
-            )
-
-    # ---------- .env helpers ----------
     def read_env_preserve(self):
         """Lê o .env retornando linhas e um dicionário de chaves->(value, line_index).
         Preserva comentários e ordem para reescrita."""
@@ -626,7 +671,6 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
             for line in lines:
                 f.write(line + "\n")
 
-    # ---------- UI handler para editar .env ----------
     def on_editar_env(self):
         try:
             dialog = EnvEditorDialog(self.env_path, self)
@@ -634,6 +678,7 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
                 updates = dialog.get_updates()
                 lines, kv = self.read_env_preserve()
                 self.write_env_preserve(lines, updates)
+                
                 QtWidgets.QMessageBox.information(
                     self, "Sucesso!", "Configurações atualizadas com sucesso!"
                 )
@@ -797,24 +842,6 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
                 self, "Erro", f"Erro ao abrir o LOG Painel de Pedidos:\n{e}"
             )
             
-    # def reset_aplicativo(self):
-    #     """Reinicia o estado do aplicativo (como se tivesse acabado de abrir)."""
-    #     try:
-    #         # Atualiza o status do serviço
-    #         self.atualizar_status_servico()
-
-    #         # Fecha e reabre a janela (simula reinício completo)
-    #         QtWidgets.QMessageBox.information(
-    #             self,
-    #             "Reiniciando",
-    #             "O aplicativo será reiniciado para aplicar as alterações.",
-    #         )
-    #         python = sys.executable
-    #         os.execl(python, python, *sys.argv)
-    #     except Exception as e:
-    #         QtWidgets.QMessageBox.warning(self, "Erro", f"Falha Catastrófica:\n{e}")
-
-
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     window = GerenciadorServicos()
