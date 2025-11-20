@@ -1,16 +1,10 @@
-pyinstaller --onefile --noconsole --icon="C:\INFARMA\APIHUB\assets\apihub-white.ico" --add-data "C:\INFARMA\APIHUB\assets\apihub.ui;assets" --add-data "C:\INFARMA\APIHUB\assets\apihub-white.ico;assets" -n "gerenciador-apihub" "C:\PROJETOS\INFARMA\PIT\gerenciador-apihub\main.py"
+pyinstaller --onefile --noconsole --icon="C:\INFARMA\APIHUB\assets\apihub-white.ico"  --add-data "C:\INFARMA\APIHUB\assets\apihub-white.ico;assets" -n "gestor-apihub" "C:\PROJETOS\INFARMA\PIT\gestor-apihub\main.py"
 
-pyinstaller --onefile --noconsole --icon=""C:\Users\Weldercris.ribeiro\Documents\INFARMA\PIT\gerenciador-apihub\assets\apihub-white.ico" --add-data "C:\INFARMA\APIHUB\assets\apihub.ui;assets" --add-data "C:\INFARMA\APIHUB\assets\apihub-white.ico;assets" -n "gerenciador-apihub" "C:\Users\Weldercris.ribeiro\Documents\INFARMA\PIT\gerenciador-apihub\main.py"
+pyinstaller --onefile --noconsole --icon="C:\Users\Weldercris.ribeiro\Documents\INFARMA\PIT\gestor-apihub\assets\apihub-white.ico" --add-data "C:\INFARMA\APIHUB\assets\apihub-white.ico;assets" -n "gestor-apihub" "C:\Users\Weldercris.ribeiro\Documents\INFARMA\PIT\gestor-apihub\main.py"
 
-C:\Users\Weldercris.ribeiro\Documents\INFARMA\PIT\gerenciador-apihub
+pyinstaller gestor-apihub.spec
 
 pyuic5 -x assets/apihub.ui -o apihub_ui.py
 
-pyuic5 --reverse apihub_ui.py -o apihub_recuperado.ui
 
 
-p
-yinstaller --clean --onefile -w --icon="assets/apihub.ico" -n "gerenciador-apihub" main.py
-
-
-TESTAR CONVERSAO DE UI PARA PY SEMPRE

@@ -376,30 +376,16 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
         else:
             self.base_dir = os.path.dirname(__file__)
 
-
-        # self.bats = {
-        #     "instalar": r"C:\\INFARMA\\APIHUB\\bats\\1-instala-servicos.bat",
-        #     "excluir": r"C:\\INFARMA\\APIHUB\\bats\\2-exclui-servicos.bat",
-        # }
-
         exe_dir = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else self.base_dir
         
-        #for key, path in self.bats.items():
-            #if not os.path.exists(path):
-               # print(f"Aviso: arquivo BAT não encontrado -> {path}")
-               
-
         self.env_path = os.path.join(exe_dir, ".env")
 
         self.create_default_env_if_missing()
 
-        icon_path = os.path.join(self.base_dir, "assets", "apihub-white.ico")
+        icon_path = os.path.join(self.base_dir, "assets", "apihub.ico")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
         
-        
-        
-            # 🎨 ÍCONES DO SISTEMA
         style = self.style()
 
         # ▶️ Botão Instalar (ícone branco)
@@ -591,14 +577,14 @@ REDIS_PORT=6379
 # Tempo para persistir o LOG em horas | default 7 * 24 = 168
 TIME_LOG=168
 
-# BANCO DE DADOS PARA ACESSO
+# CONEXÃO BD
 DATABASE_URL="sqlserver://HOSTNAME:PORTA;database=BANCO;user=USUARIO;password=SENHA;trustServerCertificate=true"
-COD_VENDEDOR= #VENDEDOR PADRÃO PARA RECEBER OS PEDIDOS
-COD_PRODUTO_SERVICO= #PRODUTOS TIPO SERVIÇO PARA INCLUSÃO DE TAXAS
-COD_PRODUTO_ENTREGA= #PRODUTOS TIPO ENTREGA PARA INCLUSÃO DE TAXA DE ENTREGA
-PAGAMENTO_ENTREGA= #FORMA DE PAGAMENTO PARA ENTREGA / PAGAR NA ENTREGA
-PAGAMENTO_ONLINE= #FORMA DE PAGAMENTO PARA ONLINE / PAGAMENTO NA PLATAFORMA
-EMAIL= #EMAIL PARA ENVIO DE NOTIFICAÇÕES
+COD_VENDEDOR=
+COD_PRODUTO_SERVICO=
+COD_PRODUTO_ENTREGA=
+PAGAMENTO_ENTREGA=
+PAGAMENTO_ONLINE=
+EMAIL= 
 
 # Dias para consulta de pedidos FastApp
 DIAS_PROCESSA_PEDIDO=5
@@ -608,7 +594,7 @@ NAPP_ORDER_STATUS_FILTER=CONFIRMED #STATUS DO PEDIDO PARA CONSULTA NAPP
 
 IFOOD_ORDER_STATUS_FILTER=PLC #STATUS DO PEDIDO PARA CONSULTA IFOOD
 IFOOD_USE_NEW_API=true 
-        """
+"""
         os.makedirs(os.path.dirname(self.env_path), exist_ok=True)
         with open(self.env_path, "w", encoding="utf-8") as f:
             f.write(default_env)
