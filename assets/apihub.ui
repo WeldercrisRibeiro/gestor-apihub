@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>621</width>
-    <height>178</height>
+    <height>244</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -189,14 +189,14 @@ QPushButton:hover {
 </string>
     </property>
     <property name="text">
-     <string>🗒️  LOG</string>
+     <string>🗒️  LOG APIHUB</string>
     </property>
    </widget>
    <widget class="QLabel" name="lblStatusServico_3">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>150</y>
+      <y>210</y>
       <width>51</width>
       <height>16</height>
      </rect>
@@ -218,7 +218,7 @@ QPushButton:hover {
     <property name="geometry">
      <rect>
       <x>70</x>
-      <y>150</y>
+      <y>210</y>
       <width>31</width>
       <height>16</height>
      </rect>
@@ -230,7 +230,7 @@ QPushButton:hover {
      </font>
     </property>
     <property name="text">
-     <string>3.2.0</string>
+     <string>2.2.0</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -392,6 +392,40 @@ QPushButton:hover {
     </property>
     <property name="text">
      <string>LOG ERRO PAINEL</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnDesinstalar">
+    <property name="geometry">
+     <rect>
+      <x>480</x>
+      <y>170</y>
+      <width>121</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton {
+    background-color: rgb(0, 0, 0);   /* preto */
+    color: rgb(255, 255, 255);        /* branco */
+    font-weight: bold;
+    border-radius: 5px;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;        /* transição suave */
+}
+
+QPushButton:hover {
+    background-color: rgb(0, 50, 100);  /* azul escuro */
+    transform: scale(1.05);             /* leve zoom */
+    box-shadow: 
+        0 0 15px rgba(255, 255, 255, 0.2),  /* brilho sutil */
+        0 4px 10px rgba(0, 0, 0, 0.5);      /* profundidade */
+}
+</string>
+    </property>
+    <property name="text">
+     <string>Desinstalar</string>
     </property>
    </widget>
   </widget>

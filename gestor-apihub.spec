@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='gestor-apihub.1.0.0',
+    name='gestor-apihub.2.0.0',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
