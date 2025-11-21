@@ -3,6 +3,10 @@ import os
 import webbrowser
 import subprocess
 import platform
+# Importação da biblioteca de ícones (Necessário: pip install qtawesome)
+import qtawesome as qta 
+import time
+
 from assets.apihub_ui import Ui_GerenciadorServicos
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import (QDialog, QLineEdit, QDialogButtonBox, QLabel)
@@ -383,24 +387,42 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
         self.btnAbrirLog.clicked.connect(self.abrir_log)
         self.btnAbrirDash.clicked.connect(self.abrir_dash)
         self.btnPainel.clicked.connect(self.abrir_painel)
-        self.btnLogErr.clicked.connect(self.abrir_painel_log_error)
+        #self.btnLogErr.clicked.connect(self.abrir_painel_log_error)
         self.btnLogAll.clicked.connect(self.abrir_painel_log_all)
         self.btnDesinstalar.clicked.connect(self.excluir_servicos_py)
-
+        
+        # Configura ícones e estilos (incluindo o botão de desinstalar)
         self._setup_icons() 
         self.atualizar_status_servico()
 
     def _setup_icons(self):
-        """Configura os ícones dos botões Instalar e Serviço."""
+        """Configura os ícones dos botões Instalar, Serviço e Desinstalar."""
         style = self.style()
         
-        # ▶️ Botão Instalar (Ícone de Play, recolorido para branco)
+        # ▶️ Botão Instalar
         play_icon = style.standardIcon(QtWidgets.QStyle.SP_MediaPlay)
         self._set_colored_icon(self.btnInstalar, play_icon)
 
-        # ⏹️ Botão Servico (Ícone de Stop, recolorido para branco)
+        # ⏹️ Botão Servico
         stop_icon = style.standardIcon(QtWidgets.QStyle.SP_MediaStop)
         self._set_colored_icon(self.btnServico, stop_icon)
+        
+        # 🗑️ Botão Desinstalar
+        try:
+            # 'fa5s.trash-alt' é o ícone sólido de lixeira
+            icon_trash = qta.icon('fa5s.trash-alt', color='white')
+            self.btnDesinstalar.setIcon(icon_trash)
+            self.btnDesinstalar.setIconSize(QtCore.QSize(20, 20))
+        except Exception as e:
+            print(f"Não foi possível carregar ícone qtawesome: {e}")
+        
+        self.btnDesinstalar.setText("Desinstalar")
+        self.btnDesinstalar.setCursor(QtCore.Qt.PointingHandCursor)
+        
+        # REMOVI O ESTILO VERMELHO FIXO DAQUI PARA COLOCAR NA LÓGICA DE STATUS
+        self.btnDesinstalar.setText("Desinstalar")
+        #self.btnDesinstalar.setStyleSheet(estilo_vermelho)
+        self.btnDesinstalar.setCursor(QtCore.Qt.PointingHandCursor)
 
 
     def _set_colored_icon(self, button, icon, size=QtCore.QSize(50, 50), color=QtGui.QColor("white")):
@@ -425,10 +447,28 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
         status = self.verificar_status_servico()
 
         if status == "Iniciado":
-            if self.parar_servico(Config.SERVICE_NAME_API) and self.parar_servico(Config.SERVICE_NAME_REDIS):
+            # 1. Feedback visual imediato para o usuário
+            self.lblStatusServico.setText("Parando...")
+            self.lblStatusServico.setStyleSheet("color: orange; font-weight: bold;")
+            self.btnServico.setEnabled(False) # Desabilita para não clicar 2x
+            
+            # Força a atualização da interface gráfica AGORA
+            QtWidgets.QApplication.processEvents()
+            
+            # 2. Tenta parar os serviços
+            parou_api = self.parar_servico(Config.SERVICE_NAME_API)
+            parou_redis = self.parar_servico(Config.SERVICE_NAME_REDIS)
+
+            # 3. Espera um pouco para o Windows processar (o "pulo do gato")
+            # Serviços demoram para sair do status "STOP_PENDING" para "STOPPED"
+            time.sleep(3) 
+
+            if parou_api and parou_redis:
                 QMessageBox.information(
                     self, "Sucesso", "Serviços parados com sucesso."
                 )
+            
+            # 4. Agora sim verifica o status real
             self.atualizar_status_servico()
 
         elif status == "Parado":
@@ -466,62 +506,120 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
         if hasattr(self, "lblStatusServico"):
             self.lblStatusServico.setText(status)
             
-        
         style = self.style()
-        # Lógica de estilo e ícones
+
+        # --- DEFINIÇÃO DOS ESTILOS (Para não ficar repetindo código) ---
+        
+        # Estilo VERMELHO (Para Stop e Desinstalar Ativo)
+        estilo_vermelho = """
+            QPushButton { 
+                background-color: #C82333; 
+                color: white; 
+                font-weight: bold; 
+                border-radius: 6px; 
+                border: none; 
+            }
+            QPushButton:hover { background-color: #e02b3c; }
+            QPushButton:pressed { background-color: #a91e2c; padding-top: 12px; }
+        """
+        
+        # Estilo CINZA (Para Desabilitados)
+        estilo_cinza = """
+            QPushButton { 
+                background-color: rgb(140, 140, 140); 
+                color: white; 
+                font-weight: bold; 
+                border-radius: 6px; 
+                border: none; 
+            }
+        """
+
+        # Estilo VERDE (Para Play Ativo)
+        estilo_verde = """
+            QPushButton { 
+                background-color: green; 
+                color: white; 
+                font-weight: bold; 
+                border-radius: 6px; 
+                border: none; 
+            }
+            QPushButton:hover { background-color: rgb(0, 197, 0); }
+            QPushButton:pressed { background-color: rgb(0, 160, 0); padding-top: 12px; }
+        """
+
+        # Estilo VERDE CLARO (Para Play quando já iniciado/desabilitado)
+        estilo_verde_claro = """
+            QPushButton { 
+                background-color: #81f485; 
+                color: white; 
+                font-weight: bold; 
+                border-radius: 6px; 
+                border: none; 
+            }
+        """
+
+        # --- LÓGICA DE STATUS ---
+
         if status == "Iniciado":
             self.lblStatusServico.setStyleSheet("color: green; font-weight: bold;")
             
-            # Botão Serviço (Parar) - Vermelho, Ícone STOP (Ativo)
-            self.btnServico.setStyleSheet(
-                """QPushButton { background-color: red; color: white; font-weight: bold; font-size:80px; border-radius: 5px; border: none; padding: 10px; }""")
+            # Botão Serviço (STOP) -> Vermelho e Ativo
+            self.btnServico.setStyleSheet(estilo_vermelho)
             self.btnServico.setEnabled(True)
 
-            # Botão Instalar (Desabilitado) - Verde Claro
-            self.btnInstalar.setStyleSheet(
-                """QPushButton { background-color: #81f485; color: rgb(255, 255, 255); font-weight: bold; font-size:80px; border-radius: 5px; border: none; padding: 10px; }""")
+            # Botão Instalar (PLAY) -> Verde Claro e Inativo (pois já roda)
+            self.btnInstalar.setStyleSheet(estilo_verde_claro)
             self.btnInstalar.setEnabled(False) 
+            
+            # Botão Desinstalar -> Vermelho e Ativo
+            self.btnDesinstalar.setStyleSheet(estilo_vermelho)
+            self.btnDesinstalar.setEnabled(True)
 
         elif status == "Parado":
             self.lblStatusServico.setStyleSheet("color: orange; font-weight: bold;")
             
-            # Botão Serviço (Parado) - Cor Neutra/Cinza (Inativo)
-            self.btnServico.setStyleSheet(
-                """QPushButton { background-color: rgb(180, 180, 180); color: rgb(255, 255, 255); font-weight: bold; font-size:80px; border-radius: 5px; border: none; padding: 10px; }"""
-            )
-            self.btnServico.setEnabled(False) # Não pode Parar se já está Parado
+            # Botão Serviço (STOP) -> Cinza e Inativo (já está parado)
+            self.btnServico.setStyleSheet(estilo_cinza)
+            self.btnServico.setEnabled(False)
 
-            # Botão Instalar (Habilitado para INICIAR) - Verde Claro/Brilhante
-            self.btnInstalar.setStyleSheet(
-                """
-                QPushButton { background-color: green; color: rgb(255, 255, 255); font-weight: bold; font-size:80px; border-radius: 5px; border: none; padding: 10px; }
-                QPushButton:pressed, QPushButton:hover { background-color: rgb(0, 197, 0); padding-top: 12px; }
-                """
-            )
+            # Botão Instalar (PLAY) -> Verde e Ativo (para Iniciar)
+            self.btnInstalar.setStyleSheet(estilo_verde)
             self.btnInstalar.setEnabled(True)
+
+            # Botão Desinstalar -> Vermelho e Ativo (Pode desinstalar se parado)
+            self.btnDesinstalar.setStyleSheet(estilo_vermelho)
+            self.btnDesinstalar.setEnabled(True)
 
         elif status == "Não instalado":
             self.lblStatusServico.setStyleSheet("color: gray; font-weight: bold;")
             
-            # Botão Serviço (Inativo) - Cinza Escuro
-            self.btnServico.setStyleSheet(
-                """QPushButton { background-color: rgb(140, 140, 140); color: rgb(255, 255, 255); font-weight: bold; font-size:80px; border-radius: 5px; border: none; padding: 10px; }""")
+            # Botão Serviço (STOP) -> Cinza e Inativo
+            self.btnServico.setStyleSheet(estilo_cinza)
             self.btnServico.setEnabled(False) 
             
-            # Botão Instalar (Habilitado para INSTALAR) - Cinza Escuro (com hover/pressed verde)
-            self.btnInstalar.setStyleSheet(
-                """
-                QPushButton { background-color: rgb(140, 140, 140); color: rgb(255, 255, 255); font-weight: bold; font-size:80px; border-radius: 5px; border: none; padding: 10px; }
-                QPushButton:pressed, QPushButton:hover { background-color: rgb(0, 197, 0); padding-top: 12px; }
-                """
-            )
+            # Botão Instalar (PLAY) -> Cinza, mas com hover verde (Instalar)
+            # Aqui mantivemos uma lógica especifica do seu código original para o botão instalar neste estado
+            self.btnInstalar.setStyleSheet("""
+                QPushButton { background-color: rgb(140, 140, 140); color: white; font-weight: bold; border-radius: 6px; border: none; }
+                QPushButton:pressed { background-color: rgb(0, 197, 0); padding-top: 12px; }
+                QPushButton:hover { background-color: rgb(160, 160, 160); }
+            """)
             self.btnInstalar.setEnabled(True)
+
+            # Botão Desinstalar -> CINZA e INATIVO (Correção solicitada)
+            self.btnDesinstalar.setStyleSheet(estilo_cinza)
+            self.btnDesinstalar.setEnabled(False)
 
         elif status == "Erro":
             self.lblStatusServico.setStyleSheet("color: red; font-weight: bold;")
             self.btnServico.setEnabled(False) 
             self.btnInstalar.setEnabled(True)
+            
+            # No erro, desabilita o desinstalar por segurança ou deixa cinza
+            self.btnDesinstalar.setStyleSheet(estilo_cinza)
+            self.btnDesinstalar.setEnabled(False)
 
+        # Garante o tamanho dos ícones
         self.btnServico.setIconSize(QtCore.QSize(50, 50))
         self.btnInstalar.setIconSize(QtCore.QSize(50, 50))
 
@@ -624,6 +722,7 @@ IFOOD_USE_NEW_API=true
         """Inicia os serviços vmd-api-hub e redis-service."""
         try:
             self.set_status_servico("Iniciando serviços...")
+            
             print("Iniciando serviços...")
             subprocess.run(["net", "start", Config.SERVICE_NAME_API],
                         check=True, creationflags=subprocess.CREATE_NO_WINDOW)
@@ -827,30 +926,11 @@ IFOOD_USE_NEW_API=true
                 os.startfile(caminho_painel)
             else:
                 QtWidgets.QMessageBox.warning(
-                    self, "Erro", f"O ENV do Painel de Pedidos não foi encontrado em:\n{caminho_painel}",
+                    self, "Erro", f"O ENV do Painel de Pedidos não foi encontrado! Verifique se a instalação foi concluída corretamente e tente novamente",
                 )
         except Exception as e:
             QtWidgets.QMessageBox.warning(
                 self, "Erro", f"Erro ao abrir o ENV Painel de Pedidos:\n{e}"
-            )
-
-    def abrir_painel_log_error(self):
-        """Abre o LOG de Erro do Painel de Pedidos."""
-        caminho_log = Config.get_painel_log_error_path()
-        if not caminho_log:
-            QtWidgets.QMessageBox.warning(self, "Erro", "A variável LOCALAPPDATA não está definida.")
-            return
-
-        try:
-            if os.path.exists(caminho_log):
-                os.startfile(caminho_log)
-            else:
-                QtWidgets.QMessageBox.warning(
-                    self, "Erro", f"O LOG de Erro do Painel de Pedidos não foi encontrado em:\n{caminho_log}",
-                )
-        except Exception as e:
-            QtWidgets.QMessageBox.warning(
-                self, "Erro", f"Erro ao abrir o LOG Painel de Pedidos:\n{e}"
             )
             
     def abrir_painel_log_all(self):
@@ -865,7 +945,7 @@ IFOOD_USE_NEW_API=true
                 os.startfile(caminho_log)
             else:
                 QtWidgets.QMessageBox.warning(
-                    self, "Erro", f"O LOG Geral do Painel de Pedidos não foi encontrado em:\n{caminho_log}",
+                    self, "Erro", f"O LOG do Painel de Pedidos não foi encontrado! Verifique se a instalação foi concluída corretamente e tente novamente!",
                 )
         except Exception as e:
             QtWidgets.QMessageBox.warning(

@@ -4,7 +4,7 @@ pyinstaller --onefile --noconsole --icon="C:\Users\Weldercris.ribeiro\Documents\
 
 pyinstaller gestor-apihub.spec
 
-pyuic5 -x assets/apihub.ui -o apihub_ui.py
+pyuic5 -x assets/apihub.ui -o assets/apihub_ui.py
 
 
 
