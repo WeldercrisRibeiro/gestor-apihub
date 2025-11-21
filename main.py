@@ -376,7 +376,7 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
 
         self.create_default_env_if_missing()
 
-        icon_path = os.path.join(self.base_dir, "assets", "apihub.ico")
+        icon_path = os.path.join(self.base_dir, "assets", "gestor.apihub.ico")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
         
