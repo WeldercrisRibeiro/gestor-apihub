@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>621</width>
-    <height>244</height>
+    <height>260</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -19,11 +19,11 @@
   <property name="maximumSize">
    <size>
     <width>621</width>
-    <height>500</height>
+    <height>260</height>
    </size>
   </property>
   <property name="windowTitle">
-   <string>Gestor Apihub 25.03</string>
+   <string>Gestor Apihub 25.03.2</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QLabel" name="lblStatusServico">
@@ -63,14 +63,13 @@
     <property name="styleSheet">
      <string notr="true">QPushButton {
     color: rgb(255, 255, 255);
-	
-	background-color: rgb(140, 140, 140);
+    background-color: rgb(140, 140, 140);
     font-weight: bold;
    	font-size:80px;
     border-radius: 5px;
     border: none;
     padding: 10px;
-}
+ }
 
 
 QPushButton:pressed {
@@ -81,7 +80,7 @@ QPushButton:pressed {
 QPushButton:hover{
     /*background-color: rgb(0, 0,166);  /*mais escuro ao pressionar */
 	background-color: rgb(0, 197, 0);
-    padding-top: 12px;  /* simula o botão afundando */
+	padding-top: 12px;  /* simula o botão afundando */
 }
 </string>
     </property>
@@ -107,7 +106,7 @@ QPushButton:hover{
     border-radius: 5px;
     border: none;
     padding: 10px;
-}
+ }
 
 
 QPushButton:pressed {
@@ -135,22 +134,22 @@ QPushButton:hover {
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton {
-    background-color: rgb(0, 0, 0);   /* preto */
+    background-color: rgb(0, 0, 0); /* preto */
     color: rgb(255, 255, 255);        /* branco */
     font-weight: bold;
     border-radius: 5px;
     border: none;
     padding: 10px 20px;
     cursor: pointer;
-    transition: all 0.3s ease;        /* transição suave */
+    transition: all 0.3s ease; /* transição suave */
 }
 
 QPushButton:hover {
-    background-color: rgb(0, 50, 100);  /* azul escuro */
+    background-color: rgb(0, 50, 100); /* azul escuro */
     transform: scale(1.05);             /* leve zoom */
     box-shadow: 
         0 0 15px rgba(255, 255, 255, 0.2),  /* brilho sutil */
-        0 4px 10px rgba(0, 0, 0, 0.5);      /* profundidade */
+        0 4px 10px rgba(0, 0, 0, 0.5); /* profundidade */
 }
 </string>
     </property>
@@ -169,22 +168,22 @@ QPushButton:hover {
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton {
-    background-color: rgb(0, 0, 0);   /* preto */
+    background-color: rgb(0, 0, 0); /* preto */
     color: rgb(255, 255, 255);        /* branco */
     font-weight: bold;
     border-radius: 5px;
     border: none;
     padding: 10px 20px;
     cursor: pointer;
-    transition: all 0.3s ease;        /* transição suave */
+    transition: all 0.3s ease; /* transição suave */
 }
 
 QPushButton:hover {
-    background-color: rgb(0, 50, 100);  /* azul escuro */
+    background-color: rgb(0, 50, 100); /* azul escuro */
     transform: scale(1.05);             /* leve zoom */
     box-shadow: 
         0 0 15px rgba(255, 255, 255, 0.2),  /* brilho sutil */
-        0 4px 10px rgba(0, 0, 0, 0.5);      /* profundidade */
+        0 4px 10px rgba(0, 0, 0, 0.5); /* profundidade */
 }
 </string>
     </property>
@@ -230,7 +229,7 @@ QPushButton:hover {
      </font>
     </property>
     <property name="text">
-     <string>25.11.21</string>
+     <string>25.12.01</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -269,22 +268,22 @@ QPushButton:hover {
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton {
-    background-color: rgb(0, 0, 0);   /* preto */
+    background-color: rgb(0, 0, 0); /* preto */
     color: rgb(255, 255, 255);        /* branco */
     font-weight: bold;
     border-radius: 5px;
     border: none;
     padding: 10px 20px;
     cursor: pointer;
-    transition: all 0.3s ease;        /* transição suave */
+    transition: all 0.3s ease; /* transição suave */
 }
 
 QPushButton:hover {
-    background-color: rgb(0, 50, 100);  /* azul escuro */
+    background-color: rgb(0, 50, 100); /* azul escuro */
     transform: scale(1.05);             /* leve zoom */
     box-shadow: 
         0 0 15px rgba(255, 255, 255, 0.2),  /* brilho sutil */
-        0 4px 10px rgba(0, 0, 0, 0.5);      /* profundidade */
+        0 4px 10px rgba(0, 0, 0, 0.5); /* profundidade */
 }
 </string>
     </property>
@@ -303,22 +302,22 @@ QPushButton:hover {
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton {
-    background-color: rgb(0, 0, 0);   /* preto */
+    background-color: rgb(0, 0, 0); /* preto */
     color: rgb(255, 255, 255);        /* branco */
     font-weight: bold;
     border-radius: 5px;
     border: none;
     padding: 10px 20px;
     cursor: pointer;
-    transition: all 0.3s ease;        /* transição suave */
+    transition: all 0.3s ease; /* transição suave */
 }
 
 QPushButton:hover {
-    background-color: rgb(0, 50, 100);  /* azul escuro */
+    background-color: rgb(0, 50, 100); /* azul escuro */
     transform: scale(1.05);             /* leve zoom */
     box-shadow: 
         0 0 15px rgba(255, 255, 255, 0.2),  /* brilho sutil */
-        0 4px 10px rgba(0, 0, 0, 0.5);      /* profundidade */
+        0 4px 10px rgba(0, 0, 0, 0.5); /* profundidade */
 }
 </string>
     </property>
@@ -337,22 +336,22 @@ QPushButton:hover {
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton {
-    background-color: rgb(0, 0, 0);   /* preto */
+    background-color: rgb(0, 0, 0); /* preto */
     color: rgb(255, 255, 255);        /* branco */
     font-weight: bold;
     border-radius: 5px;
     border: none;
     padding: 10px 20px;
     cursor: pointer;
-    transition: all 0.3s ease;        /* transição suave */
+    transition: all 0.3s ease; /* transição suave */
 }
 
 QPushButton:hover {
-    background-color: rgb(0, 50, 100);  /* azul escuro */
+    background-color: rgb(0, 50, 100); /* azul escuro */
     transform: scale(1.05);             /* leve zoom */
     box-shadow: 
         0 0 15px rgba(255, 255, 255, 0.2),  /* brilho sutil */
-        0 4px 10px rgba(0, 0, 0, 0.5);      /* profundidade */
+        0 4px 10px rgba(0, 0, 0, 0.5); /* profundidade */
 }
 </string>
     </property>
@@ -381,21 +380,55 @@ QPushButton:hover {
 
 /* Hover com leve brilho e suavização */
 QPushButton:hover {
-    background-color: #e02b3c;      /* Tom mais claro */
+    background-color: #e02b3c;
     border: 1px solid #ff4a55;      /* Realce */
 }
-
-/* Pressed com efeito de &quot;apertado&quot; */
+/* Efeito de clique */
 QPushButton:pressed {
     background-color: #a91e2c;      /* Tom mais escuro */
-    padding-top: 12px;              /* Desce um pouquinho */
-    padding-bottom: 8px;            /* Ajusta para não aumentar o botão */
-    border: 1px solid #7f131e;      /* Borda mais escura */
+    padding-top: 12px;
+    padding-bottom: 8px;
+    border: 1px solid #7f131e;
 }
 </string>
     </property>
     <property name="text">
      <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnAtualizarApi">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>170</y>
+      <width>211</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton {
+            background-color: rgb(0, 50, 100); /* Azul escuro */
+            color: rgb(255, 255, 255);        /* branco */
+            font-weight: bold;
+            border-radius: 5px;
+            border: none;
+            padding: 8px 18px;
+            transition: all 0.3s ease;
+        }
+
+        QPushButton:hover {
+            background-color: rgb(0, 80, 150);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        QPushButton:pressed {
+            background-color: rgb(0, 30, 80);
+            padding-top: 12px;
+            padding-bottom: 8px;
+        }
+    </string>
+    </property>
+    <property name="text">
+     <string>🔄️ ATUALIZAR APIHUB</string>
     </property>
    </widget>
   </widget>

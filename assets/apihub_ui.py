@@ -14,9 +14,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_GerenciadorServicos(object):
     def setupUi(self, GerenciadorServicos):
         GerenciadorServicos.setObjectName("GerenciadorServicos")
-        GerenciadorServicos.resize(621, 244)
+        GerenciadorServicos.resize(621, 260)
         GerenciadorServicos.setMinimumSize(QtCore.QSize(621, 100))
-        GerenciadorServicos.setMaximumSize(QtCore.QSize(621, 500))
+        GerenciadorServicos.setMaximumSize(QtCore.QSize(621, 260))
         self.centralwidget = QtWidgets.QWidget(GerenciadorServicos)
         self.centralwidget.setObjectName("centralwidget")
         self.lblStatusServico = QtWidgets.QLabel(self.centralwidget)
@@ -28,14 +28,13 @@ class Ui_GerenciadorServicos(object):
         self.btnInstalar.setGeometry(QtCore.QRect(20, 30, 121, 111))
         self.btnInstalar.setStyleSheet("QPushButton {\n"
 "    color: rgb(255, 255, 255);\n"
-"    \n"
 "    background-color: rgb(140, 140, 140);\n"
 "    font-weight: bold;\n"
 "       font-size:80px;\n"
 "    border-radius: 5px;\n"
 "    border: none;\n"
 "    padding: 10px;\n"
-"}\n"
+" }\n"
 "\n"
 "\n"
 "QPushButton:pressed {\n"
@@ -61,7 +60,7 @@ class Ui_GerenciadorServicos(object):
 "    border-radius: 5px;\n"
 "    border: none;\n"
 "    padding: 10px;\n"
-"}\n"
+" }\n"
 "\n"
 "\n"
 "QPushButton:pressed {\n"
@@ -78,44 +77,44 @@ class Ui_GerenciadorServicos(object):
         self.btnEditarEnv = QtWidgets.QPushButton(self.centralwidget)
         self.btnEditarEnv.setGeometry(QtCore.QRect(290, 70, 151, 31))
         self.btnEditarEnv.setStyleSheet("QPushButton {\n"
-"    background-color: rgb(0, 0, 0);   /* preto */\n"
+"    background-color: rgb(0, 0, 0); /* preto */\n"
 "    color: rgb(255, 255, 255);        /* branco */\n"
 "    font-weight: bold;\n"
 "    border-radius: 5px;\n"
 "    border: none;\n"
 "    padding: 10px 20px;\n"
 "    cursor: pointer;\n"
-"    transition: all 0.3s ease;        /* transição suave */\n"
+"    transition: all 0.3s ease; /* transição suave */\n"
 "}\n"
 "\n"
 "QPushButton:hover {\n"
-"    background-color: rgb(0, 50, 100);  /* azul escuro */\n"
+"    background-color: rgb(0, 50, 100); /* azul escuro */\n"
 "    transform: scale(1.05);             /* leve zoom */\n"
 "    box-shadow: \n"
 "        0 0 15px rgba(255, 255, 255, 0.2),  /* brilho sutil */\n"
-"        0 4px 10px rgba(0, 0, 0, 0.5);      /* profundidade */\n"
+"        0 4px 10px rgba(0, 0, 0, 0.5); /* profundidade */\n"
 "}\n"
 "")
         self.btnEditarEnv.setObjectName("btnEditarEnv")
         self.btnAbrirLog = QtWidgets.QPushButton(self.centralwidget)
         self.btnAbrirLog.setGeometry(QtCore.QRect(290, 110, 151, 31))
         self.btnAbrirLog.setStyleSheet("QPushButton {\n"
-"    background-color: rgb(0, 0, 0);   /* preto */\n"
+"    background-color: rgb(0, 0, 0); /* preto */\n"
 "    color: rgb(255, 255, 255);        /* branco */\n"
 "    font-weight: bold;\n"
 "    border-radius: 5px;\n"
 "    border: none;\n"
 "    padding: 10px 20px;\n"
 "    cursor: pointer;\n"
-"    transition: all 0.3s ease;        /* transição suave */\n"
+"    transition: all 0.3s ease; /* transição suave */\n"
 "}\n"
 "\n"
 "QPushButton:hover {\n"
-"    background-color: rgb(0, 50, 100);  /* azul escuro */\n"
+"    background-color: rgb(0, 50, 100); /* azul escuro */\n"
 "    transform: scale(1.05);             /* leve zoom */\n"
 "    box-shadow: \n"
 "        0 0 15px rgba(255, 255, 255, 0.2),  /* brilho sutil */\n"
-"        0 4px 10px rgba(0, 0, 0, 0.5);      /* profundidade */\n"
+"        0 4px 10px rgba(0, 0, 0, 0.5); /* profundidade */\n"
 "}\n"
 "")
         self.btnAbrirLog.setObjectName("btnAbrirLog")
@@ -146,66 +145,66 @@ class Ui_GerenciadorServicos(object):
         self.btnAbrirDash = QtWidgets.QPushButton(self.centralwidget)
         self.btnAbrirDash.setGeometry(QtCore.QRect(290, 30, 311, 31))
         self.btnAbrirDash.setStyleSheet("QPushButton {\n"
-"    background-color: rgb(0, 0, 0);   /* preto */\n"
+"    background-color: rgb(0, 0, 0); /* preto */\n"
 "    color: rgb(255, 255, 255);        /* branco */\n"
 "    font-weight: bold;\n"
 "    border-radius: 5px;\n"
 "    border: none;\n"
 "    padding: 10px 20px;\n"
 "    cursor: pointer;\n"
-"    transition: all 0.3s ease;        /* transição suave */\n"
+"    transition: all 0.3s ease; /* transição suave */\n"
 "}\n"
 "\n"
 "QPushButton:hover {\n"
-"    background-color: rgb(0, 50, 100);  /* azul escuro */\n"
+"    background-color: rgb(0, 50, 100); /* azul escuro */\n"
 "    transform: scale(1.05);             /* leve zoom */\n"
 "    box-shadow: \n"
 "        0 0 15px rgba(255, 255, 255, 0.2),  /* brilho sutil */\n"
-"        0 4px 10px rgba(0, 0, 0, 0.5);      /* profundidade */\n"
+"        0 4px 10px rgba(0, 0, 0, 0.5); /* profundidade */\n"
 "}\n"
 "")
         self.btnAbrirDash.setObjectName("btnAbrirDash")
         self.btnPainel = QtWidgets.QPushButton(self.centralwidget)
         self.btnPainel.setGeometry(QtCore.QRect(450, 70, 151, 31))
         self.btnPainel.setStyleSheet("QPushButton {\n"
-"    background-color: rgb(0, 0, 0);   /* preto */\n"
+"    background-color: rgb(0, 0, 0); /* preto */\n"
 "    color: rgb(255, 255, 255);        /* branco */\n"
 "    font-weight: bold;\n"
 "    border-radius: 5px;\n"
 "    border: none;\n"
 "    padding: 10px 20px;\n"
 "    cursor: pointer;\n"
-"    transition: all 0.3s ease;        /* transição suave */\n"
+"    transition: all 0.3s ease; /* transição suave */\n"
 "}\n"
 "\n"
 "QPushButton:hover {\n"
-"    background-color: rgb(0, 50, 100);  /* azul escuro */\n"
+"    background-color: rgb(0, 50, 100); /* azul escuro */\n"
 "    transform: scale(1.05);             /* leve zoom */\n"
 "    box-shadow: \n"
 "        0 0 15px rgba(255, 255, 255, 0.2),  /* brilho sutil */\n"
-"        0 4px 10px rgba(0, 0, 0, 0.5);      /* profundidade */\n"
+"        0 4px 10px rgba(0, 0, 0, 0.5); /* profundidade */\n"
 "}\n"
 "")
         self.btnPainel.setObjectName("btnPainel")
         self.btnLogAll = QtWidgets.QPushButton(self.centralwidget)
         self.btnLogAll.setGeometry(QtCore.QRect(450, 110, 151, 31))
         self.btnLogAll.setStyleSheet("QPushButton {\n"
-"    background-color: rgb(0, 0, 0);   /* preto */\n"
+"    background-color: rgb(0, 0, 0); /* preto */\n"
 "    color: rgb(255, 255, 255);        /* branco */\n"
 "    font-weight: bold;\n"
 "    border-radius: 5px;\n"
 "    border: none;\n"
 "    padding: 10px 20px;\n"
 "    cursor: pointer;\n"
-"    transition: all 0.3s ease;        /* transição suave */\n"
+"    transition: all 0.3s ease; /* transição suave */\n"
 "}\n"
 "\n"
 "QPushButton:hover {\n"
-"    background-color: rgb(0, 50, 100);  /* azul escuro */\n"
+"    background-color: rgb(0, 50, 100); /* azul escuro */\n"
 "    transform: scale(1.05);             /* leve zoom */\n"
 "    box-shadow: \n"
 "        0 0 15px rgba(255, 255, 255, 0.2),  /* brilho sutil */\n"
-"        0 4px 10px rgba(0, 0, 0, 0.5);      /* profundidade */\n"
+"        0 4px 10px rgba(0, 0, 0, 0.5); /* profundidade */\n"
 "}\n"
 "")
         self.btnLogAll.setObjectName("btnLogAll")
@@ -222,20 +221,42 @@ class Ui_GerenciadorServicos(object):
 "\n"
 "/* Hover com leve brilho e suavização */\n"
 "QPushButton:hover {\n"
-"    background-color: #e02b3c;      /* Tom mais claro */\n"
+"    background-color: #e02b3c;\n"
 "    border: 1px solid #ff4a55;      /* Realce */\n"
 "}\n"
-"\n"
-"/* Pressed com efeito de \"apertado\" */\n"
+"/* Efeito de clique */\n"
 "QPushButton:pressed {\n"
 "    background-color: #a91e2c;      /* Tom mais escuro */\n"
-"    padding-top: 12px;              /* Desce um pouquinho */\n"
-"    padding-bottom: 8px;            /* Ajusta para não aumentar o botão */\n"
-"    border: 1px solid #7f131e;      /* Borda mais escura */\n"
+"    padding-top: 12px;\n"
+"    padding-bottom: 8px;\n"
+"    border: 1px solid #7f131e;\n"
 "}\n"
 "")
         self.btnDesinstalar.setText("")
         self.btnDesinstalar.setObjectName("btnDesinstalar")
+        self.btnAtualizarApi = QtWidgets.QPushButton(self.centralwidget)
+        self.btnAtualizarApi.setGeometry(QtCore.QRect(20, 170, 211, 31))
+        self.btnAtualizarApi.setStyleSheet("QPushButton {\n"
+"            background-color: rgb(0, 50, 100); /* Azul escuro */\n"
+"            color: rgb(255, 255, 255);        /* branco */\n"
+"            font-weight: bold;\n"
+"            border-radius: 5px;\n"
+"            border: none;\n"
+"            padding: 8px 18px;\n"
+"            transition: all 0.3s ease;\n"
+"        }\n"
+"\n"
+"        QPushButton:hover {\n"
+"            background-color: rgb(0, 80, 150);\n"
+"            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);\n"
+"        }\n"
+"        QPushButton:pressed {\n"
+"            background-color: rgb(0, 30, 80);\n"
+"            padding-top: 12px;\n"
+"            padding-bottom: 8px;\n"
+"        }\n"
+"    ")
+        self.btnAtualizarApi.setObjectName("btnAtualizarApi")
         GerenciadorServicos.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(GerenciadorServicos)
@@ -243,18 +264,19 @@ class Ui_GerenciadorServicos(object):
 
     def retranslateUi(self, GerenciadorServicos):
         _translate = QtCore.QCoreApplication.translate
-        GerenciadorServicos.setWindowTitle(_translate("GerenciadorServicos", "Gestor Apihub 25.03"))
+        GerenciadorServicos.setWindowTitle(_translate("GerenciadorServicos", "Gestor Apihub 25.03.2"))
         self.lblStatusServico.setToolTip(_translate("GerenciadorServicos", "<html><head/><body><p>Status:</p></body></html>"))
         self.lblStatusServico.setText(_translate("GerenciadorServicos", "<html><head/><body><p><br/></p></body></html>"))
         self.btnInstalar.setWhatsThis(_translate("GerenciadorServicos", "<html><head/><body><p>v</p></body></html>"))
         self.btnEditarEnv.setText(_translate("GerenciadorServicos", "🛠️   ENV APIHUB"))
         self.btnAbrirLog.setText(_translate("GerenciadorServicos", "🗒️  LOG APIHUB"))
         self.lblStatusServico_3.setText(_translate("GerenciadorServicos", "Versão:"))
-        self.lblStatusServico_4.setText(_translate("GerenciadorServicos", "25.11.21"))
+        self.lblStatusServico_4.setText(_translate("GerenciadorServicos", "25.12.01"))
         self.lblStatusServico_5.setText(_translate("GerenciadorServicos", "Status: "))
         self.btnAbrirDash.setText(_translate("GerenciadorServicos", " DASHBOARD"))
         self.btnPainel.setText(_translate("GerenciadorServicos", "🛠️   ENV PAINEL"))
         self.btnLogAll.setText(_translate("GerenciadorServicos", " LOG PAINEL"))
+        self.btnAtualizarApi.setText(_translate("GerenciadorServicos", "🔄️ ATUALIZAR APIHUB"))
 
 
 if __name__ == "__main__":

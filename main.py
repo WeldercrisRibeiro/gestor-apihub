@@ -3,20 +3,21 @@ import os
 import webbrowser
 import subprocess
 import platform
-# Importação da biblioteca de ícones (Necessário: pip install qtawesome)
-import qtawesome as qta 
 import time
+import requests 
+import pyodbc
+import qtawesome as qta 
 
 from assets.apihub_ui import Ui_GerenciadorServicos
-from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import (QDialog, QLineEdit, QDialogButtonBox, QLabel)
+from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5.QtWidgets import (QDialog, QLineEdit, QDialogButtonBox, QLabel, QGridLayout, QMessageBox, QListWidget, QListWidgetItem, QPushButton) # ADICIONADO QListWidget, QPushButton
 from PyQt5.QtGui import QIcon
-from PyQt5 import QtWidgets, QtGui
-import pyodbc
-from PyQt5.QtWidgets import QGridLayout, QMessageBox
+from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QTranslator, QLocale, QLibraryInfo
 
 
-# --- CONSTANTES DE CONFIGURAÇÃO CENTRALIZADAS ---
+
+
 class Config:
     SERVICE_NAME_API = "vmd-api-hub"
     SERVICE_NAME_REDIS = "redis-service"
@@ -24,7 +25,10 @@ class Config:
     LOG_PATH_API = os.path.join(BASE_DIR_INFARMA, "logs", "app.log")
     URL_DASHBOARD = "http://127.0.0.1:3334/dashboard/"
     
-    # Caminhos para o Painel de Pedidos (assumindo LOCALAPPDATA)
+
+    REPO_FULL_NAME = "WeldercrisRibeiro/infarma-apihub" 
+    TARGET_FILE_NAME = "vmd-api-hub.exe"
+   
     @staticmethod
     def get_painel_base_path():
         localappdata = os.getenv("LOCALAPPDATA")
@@ -38,16 +42,321 @@ class Config:
         return os.path.join(base, "resources", "app.asar.unpacked", "config", ".env") if base else None
     
     @staticmethod
-    def get_painel_log_error_path():
-        base = Config.get_painel_base_path()
-        return os.path.join(base, "logs", "error.log") if base else None
-    
-    @staticmethod
     def get_painel_log_all_path():
         base = Config.get_painel_base_path()
         return os.path.join(base, "logs", "all.log") if base else None
 
-# --- CLASSE DE VALIDAÇÃO DE BANCO DE DADOS ---
+
+
+def get_available_versions(repo_name: str) -> list:
+    """Consulta a API do GitHub para obter as releases e extrair a versão e o link do executável."""
+    API_URL = f"https://api.github.com/repos/{repo_name}/releases"
+    
+    try:
+        # 1. Faz a requisição para a API de Releases do GitHub
+        response = requests.get(API_URL)
+        response.raise_for_status() # Lança exceção para códigos de erro HTTP
+        releases_data = response.json()
+        
+        versions = []
+        
+        # 2. Itera sobre cada release e busca o executável
+        for release in releases_data:
+            version_tag = release.get("tag_name")
+            download_url = None
+            
+            # As 'assets' são os arquivos anexados à release (seu EXE)
+            for asset in release.get("assets", []):
+                # Assumimos que o nome do asset é o nome do executável
+                if asset.get("name") == Config.TARGET_FILE_NAME:
+                    # Usamos 'browser_download_url' para o download direto
+                    download_url = asset.get("browser_download_url")
+                    break
+            
+            # Ignora drafts e releases sem o executável correto
+            if version_tag and download_url and not release.get("draft"):
+                versions.append({
+                    "version": version_tag,
+                    "download_url": download_url
+                })
+        
+        return versions
+    
+    except requests.exceptions.RequestException as e:
+        print(f"Erro ao conectar com o GitHub: {e}")
+        return []
+    except Exception as e:
+        print(f"Erro inesperado na listagem de releases: {e}")
+        return []
+
+
+
+class DownloadWorker(QThread):
+    """Worker que executa o download em uma thread separada."""
+    # Sinal emitido ao progresso
+    progress_signal = pyqtSignal(int) 
+    # Sinal emitido ao fim (True=Sucesso/False=Falha, Message=String)
+    finished_signal = pyqtSignal(bool, str)
+
+    def __init__(self, download_url: str, target_filename: str, parent=None):
+        super().__init__(parent)
+        self.download_url = download_url
+        self.target_filename = target_filename
+
+    def run(self):
+        full_target_path = os.path.join(Config.BASE_DIR_INFARMA, self.target_filename)
+        
+        if not os.path.isdir(Config.BASE_DIR_INFARMA):
+            self.finished_signal.emit(False, f"Diretório de destino não existe: {Config.BASE_DIR_INFARMA}")
+            return
+        
+        # ⚠️ TENTA PARAR O SERVIÇO ANTES DE SUBSTITUIR O EXECUTÁVEL
+        try:
+             subprocess.run(["net", "stop", Config.SERVICE_NAME_API], creationflags=subprocess.CREATE_NO_WINDOW)
+             time.sleep(2) # Pequena pausa para garantir que o serviço pare.
+             # Para o REDIS também, caso ele esteja relacionado:
+             subprocess.run(["net", "stop", Config.SERVICE_NAME_REDIS], creationflags=subprocess.CREATE_NO_WINDOW)
+             time.sleep(1)
+        except Exception:
+             pass 
+
+        try:
+            with requests.get(self.download_url, stream=True) as r:
+                r.raise_for_status()
+                total_size = int(r.headers.get('content-length', 0))
+                
+                with open(full_target_path, 'wb') as f:
+                    downloaded_size = 0
+                    for chunk in r.iter_content(chunk_size=8192):
+                        if chunk:
+                            f.write(chunk)
+                            downloaded_size += len(chunk)
+                            if total_size > 0:
+                                progress = int((downloaded_size / total_size) * 100)
+                                self.progress_signal.emit(progress)
+
+            self.finished_signal.emit(True, f"Apihub atualizado com sucesso!")
+
+            
+
+        except requests.exceptions.RequestException as e:
+            self.finished_signal.emit(False, f"Erro durante o download do arquivo:\n{e}")
+        except IOError as e:
+            # ERRO MAIS COMUM: O EXE ESTÁ EM USO
+            self.finished_signal.emit(False, f"Erro ao salvar o arquivo no disco (IOError). O '{Config.SERVICE_NAME_API}' provavelmente está em uso. Por favor, **pare o serviço manualmente** antes de tentar a atualização.")
+        except Exception as e:
+            self.finished_signal.emit(False, f"Ocorreu um erro inesperado: {e}")
+
+class VersionsDialog(QDialog):
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Atualização Apihub")
+        self.setFixedSize(400, 350)
+        self.thread = None 
+
+        
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #2e2e2e; /* Fundo cinza escuro */
+                color: #ffffff; /* Texto principal branco */
+            }
+            QLabel {
+                color: #ffffff; /* Labels em branco */
+                padding: 5px 0;
+            }
+            QListWidget {
+                background-color: #1e1e1e; /* Fundo da lista mais escuro */
+                border: 1px solid #444444; /* Borda sutil */
+                color: #ffffff;
+                selection-background-color: #005090; /* Azul escuro para seleção */
+                selection-color: #ffffff;
+            }
+            QPushButton {
+                background-color: #000000; /* Botões pretos */
+                color: #ffffff;
+                font-weight: bold;
+                border-radius: 5px;
+                border: none;
+                padding: 10px 20px;
+            }
+            QPushButton:hover {
+                background-color: #005090; /* Hover azul escuro, como nos botões secundários da tela principal */
+            }
+            QPushButton#btn_download { /* Estilo específico para o botão de Baixar */
+                background-color: #4CAF50; /* Verde, para ação primária (se quiser manter o padrão de sucesso) */
+            }
+            QPushButton#btn_download:hover {
+                background-color: #45A049;
+            }
+            QPushButton#btn_download:pressed {
+                background-color: #3E8E41;
+            }
+            QPushButton#btn_close { /* Estilo específico para o botão Fechar */
+                background-color: #C82333; /* Vermelho, como o Desinstalar */
+            }
+            QPushButton#btn_close:hover {
+                background-color: #e02b3c;
+            }
+            
+        """)
+        # --- FIM DO BLOCO DE ESTILIZAÇÃO ---
+
+        # Layout
+        layout = QtWidgets.QVBoxLayout(self)
+
+        # 1. Label de Instrução
+        label = QtWidgets.QLabel("Selecione a versão desejada e clique em Baixar:")
+        layout.addWidget(label)
+
+        # 2. QListWidget para Versões
+        self.listWidget_versions = QListWidget()
+        layout.addWidget(self.listWidget_versions)
+
+        # 3. Botão Baixar
+        self.btn_download = QPushButton("Baixar e Substituir")
+        self.btn_download.setObjectName("btn_download") # Necessário para o estilo
+        self.btn_download.setEnabled(False) 
+        self.btn_download.clicked.connect(self.start_update)
+        layout.addWidget(self.btn_download)
+
+        # 4. Label de Status do Download
+        self.lbl_status_download = QLabel("Status: Aguardando seleção...")
+        layout.addWidget(self.lbl_status_download)
+        
+        # 5. Adicionar um botão de Fechar (opcional, mas bom para UX)
+        self.btn_close = QPushButton("Fechar")
+        self.btn_close.setObjectName("btn_close") # Necessário para o estilo
+        self.btn_close.clicked.connect(self.accept)
+        layout.addWidget(self.btn_close)
+
+        # Conexão: Habilitar o botão de download ao selecionar um item
+        self.listWidget_versions.itemSelectionChanged.connect(self.enable_download_button)
+
+        # Carregar as versões na inicialização
+        self.load_versions()
+    
+    def enable_download_button(self):
+        """Habilita o botão Baixar se um item estiver selecionado."""
+        self.btn_download.setEnabled(bool(self.listWidget_versions.selectedItems()))
+
+    def load_versions(self):
+        """Busca as versões do GitHub e popula o QListWidget."""
+        self.listWidget_versions.addItem(QListWidgetItem("Carregando versões..."))
+        QtWidgets.QApplication.processEvents()
+        
+        versions = get_available_versions(Config.REPO_FULL_NAME)
+        self.listWidget_versions.clear()
+
+        if not versions:
+            QMessageBox.warning(self, "Aviso", f"Não foi possível carregar as releases do repositório {Config.REPO_FULL_NAME}. Verifique a conexão.")
+            return
+        
+        for v_info in versions:
+            item = QListWidgetItem(v_info["version"])
+            # Armazenamos o URL de download como 'data' no item (Role: 1)
+            item.setData(1, v_info["download_url"]) 
+            self.listWidget_versions.addItem(item)
+
+    def start_update(self):
+        """Prepara e inicia a thread de download, validando se uma versão foi selecionada."""
+        
+        selected_items = self.listWidget_versions.selectedItems()
+        
+        # -------------------------------------------------------------
+        # --- VALIDAÇÃO DE SELEÇÃO (Funcionalidade) ---
+        # -------------------------------------------------------------
+        # Se a lista de itens selecionados estiver vazia, exibe o aviso.
+        if not selected_items:
+            QMessageBox.warning(self, "Aviso", "Por favor, selecione uma versão da lista antes de clicar em Baixar e Substituir.")
+            return # IMPEDE a execução do restante do método.
+        # -------------------------------------------------------------
+        
+        # O código só continua se selected_items tiver pelo menos um item.
+        item = selected_items[0]
+        version = item.text()
+        download_url = item.data(1)
+        
+        if not download_url:
+            QMessageBox.critical(self, "Erro", "URL de download não encontrada.")
+            return
+            
+        first_reply_msg = QMessageBox(self)
+        first_reply_msg.setStyleSheet(self.styleSheet()) 
+        first_reply_msg.setWindowTitle('Confirmação de Versão')
+        first_reply_msg.setText(f"Você selecionou a versão {version}.\n\nDeseja continuar?")
+        first_reply_msg.setIcon(QMessageBox.Question)
+        
+        # Adiciona botões customizados com o texto em Português
+        btn_sim_v1 = first_reply_msg.addButton("SIM", QMessageBox.YesRole)
+        btn_nao_v1 = first_reply_msg.addButton("NÃO", QMessageBox.NoRole)
+        
+        # Executa o primeiro diálogo
+        first_reply_msg.exec_()
+        
+        # Verifica o resultado do primeiro diálogo
+        if first_reply_msg.clickedButton() == btn_nao_v1:
+            return
+            
+        # -------------------------------------------------------------
+        # --- 2. CONFIRMAÇÃO FINAL DE SUBSTITUIÇÃO ---
+        # -------------------------------------------------------------
+            
+        # Segundo, confirma a ação de substituição
+        final_msg = QMessageBox(self)
+        final_msg.setStyleSheet(self.styleSheet()) 
+        final_msg.setWindowTitle('⚠️ Confirmação Final de Atualização')
+        final_msg.setText(f"Após confirmar, o executável vmd-api-hub será substituído pela versão {version}. Você tem certeza disso?")
+        final_msg.setIcon(QMessageBox.Warning)
+        
+        # Adiciona botões customizados com o texto em Português
+        btn_sim = final_msg.addButton("SIM", QMessageBox.YesRole)
+        btn_nao = final_msg.addButton("NÃO", QMessageBox.NoRole)
+        
+        # Executa a caixa de diálogo
+        final_msg.exec_()
+        
+        # Verifica qual botão foi clicado
+        if final_msg.clickedButton() == btn_sim:
+            
+            # Feedback visual e desabilita botões
+            self.btn_download.setEnabled(False)
+            self.listWidget_versions.setEnabled(False)
+            self.lbl_status_download.setText(f"Status: Iniciando download do vmd-api-hub-{version}...")
+            
+            # Cria e inicia a Thread
+            self.thread = DownloadWorker(download_url, Config.TARGET_FILE_NAME, self)
+            self.thread.progress_signal.connect(self.update_download_status)
+            self.thread.finished_signal.connect(self.download_finished)
+            self.thread.start()
+        
+    def update_download_status(self, progress: int):
+        """Atualiza o label de status com o progresso (em porcentagem)."""
+        self.lbl_status_download.setText(f"Status: Baixando... {progress}% concluído")
+
+    def download_finished(self, success: bool, message: str):
+        """Trata o resultado da thread de download."""
+        self.btn_download.setEnabled(True) # Reabilita o botão
+        self.listWidget_versions.setEnabled(True)
+        self.lbl_status_download.setText("Status: Concluído.")
+        
+        if success:
+            QMessageBox.information(
+                self, "Sucesso!", f"Atualização finalizada:\n\n{message}"
+            )
+
+            
+            # Atualiza o status do serviço na janela principal
+            if self.parent() and hasattr(self.parent(), 'atualizar_status_servico'):
+                self.parent().atualizar_status_servico()
+
+            self.accept()
+        else:
+            QMessageBox.critical(
+                self, "Falha na Atualização", message
+            )
+            
+
 class DatabaseValidator:
     def __init__(self, host, port, db, user, pwd):
         self.host = host
@@ -106,7 +415,6 @@ class DatabaseValidator:
             if conn:
                 conn.close()
 
-# --- CLASSE EnvEditorDialog ---
 class EnvEditorDialog(QDialog):
     
     def __init__(self, env_path, parent=None):
@@ -379,7 +687,26 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
         icon_path = os.path.join(self.base_dir, "assets", "gestor.apihub.ico")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
-        
+            
+        # --- Configuração do Novo Botão btnAtualizarApi ---
+        # Como o .ui não foi modificado, vamos tentar criar o objeto
+        # Se você atualizar o .ui e o apihub_ui.py, remova este bloco.
+        try:
+            self.btnAtualizarApi = self.findChild(QPushButton, "btnAtualizarApi")
+            if not self.btnAtualizarApi:
+                 # Cria o botão se ele não foi carregado pelo .ui (simulando a inclusão)
+                self.btnAtualizarApi = QPushButton("🔄️ ATUALIZAR APIHUB", self.centralwidget)
+                self.btnAtualizarApi.setObjectName("btnAtualizarApi")
+                # Define a posição (Ajuste conforme seu layout!)
+                self.btnAtualizarApi.setGeometry(QtCore.QRect(20, 170, 211, 31)) 
+                self.btnAtualizarApi.setStyleSheet(self.get_update_button_style())
+                self.btnAtualizarApi.setCursor(QtCore.Qt.PointingHandCursor)
+                
+        except Exception:
+            # Garante que a variável exista, caso o findChild falhe
+            self.btnAtualizarApi = QPushButton("⬇️ ATUALIZAR API", self.centralwidget)
+
+
         # Conexão de botões
         self.btnInstalar.clicked.connect(self.instalar_servicos_py) # Instala/Inicia
         self.btnServico.clicked.connect(self.on_btn_servico_click) # Parar
@@ -387,14 +714,46 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
         self.btnAbrirLog.clicked.connect(self.abrir_log)
         self.btnAbrirDash.clicked.connect(self.abrir_dash)
         self.btnPainel.clicked.connect(self.abrir_painel)
-        #self.btnLogErr.clicked.connect(self.abrir_painel_log_error)
         self.btnLogAll.clicked.connect(self.abrir_painel_log_all)
         self.btnDesinstalar.clicked.connect(self.excluir_servicos_py)
+        
+        # --- CONEXÃO DO NOVO BOTÃO DE ATUALIZAÇÃO ---
+        self.btnAtualizarApi.clicked.connect(self.on_btn_atualizar_api)
+        # ---------------------------------------------
         
         # Configura ícones e estilos (incluindo o botão de desinstalar)
         self._setup_icons() 
         self.atualizar_status_servico()
+        
+    def get_update_button_style(self):
+        """Estilo para o botão de atualização."""
+        return """
+        QPushButton {
+            background-color: rgb(0, 50, 100); /* Azul escuro */
+            color: rgb(255, 255, 255);        /* branco */
+            font-weight: bold;
+            border-radius: 5px;
+            border: none;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
 
+        QPushButton:hover {
+            background-color: rgb(0, 80, 150);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        QPushButton:pressed {
+            background-color: rgb(0, 30, 80);
+            padding-top: 12px;
+            padding-bottom: 8px;
+        }
+        """
+
+    def on_btn_atualizar_api(self):
+        """Abre a janela de listagem e download de versões."""
+        dialog = VersionsDialog(self)
+        dialog.exec_()
+        
     def _setup_icons(self):
         """Configura os ícones dos botões Instalar, Serviço e Desinstalar."""
         style = self.style()
@@ -575,6 +934,9 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
             self.btnDesinstalar.setStyleSheet(estilo_vermelho)
             self.btnDesinstalar.setEnabled(True)
 
+            self.btnAtualizarApi.setStyleSheet(estilo_cinza)
+            self.btnAtualizarApi.setEnabled(False)
+
         elif status == "Parado":
             self.lblStatusServico.setStyleSheet("color: orange; font-weight: bold;")
             
@@ -589,6 +951,9 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
             # Botão Desinstalar -> Vermelho e Ativo (Pode desinstalar se parado)
             self.btnDesinstalar.setStyleSheet(estilo_vermelho)
             self.btnDesinstalar.setEnabled(True)
+
+            self.btnAtualizarApi.setStyleSheet(estilo_cinza)
+            self.btnAtualizarApi.setEnabled(False)
 
         elif status == "Não instalado":
             self.lblStatusServico.setStyleSheet("color: gray; font-weight: bold;")
@@ -606,9 +971,14 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
             """)
             self.btnInstalar.setEnabled(True)
 
+            #self.btnAtualizarApi.setStyleSheet(estilo_cinza)
+            self.btnAtualizarApi.setEnabled(True)
+
             # Botão Desinstalar -> CINZA e INATIVO (Correção solicitada)
             self.btnDesinstalar.setStyleSheet(estilo_cinza)
             self.btnDesinstalar.setEnabled(False)
+            
+            #self.atualizar_status_servico()
 
         elif status == "Erro":
             self.lblStatusServico.setStyleSheet("color: red; font-weight: bold;")
@@ -618,6 +988,11 @@ class GerenciadorServicos(QtWidgets.QMainWindow,Ui_GerenciadorServicos):
             # No erro, desabilita o desinstalar por segurança ou deixa cinza
             self.btnDesinstalar.setStyleSheet(estilo_cinza)
             self.btnDesinstalar.setEnabled(False)
+
+            self.btnAtualizarApi.setStyleSheet(estilo_cinza)
+            self.btnAtualizarApi.setEnabled(False)
+
+
 
         # Garante o tamanho dos ícones
         self.btnServico.setIconSize(QtCore.QSize(50, 50))
