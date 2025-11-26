@@ -198,7 +198,13 @@ class VersionsDialog(QDialog):
             QPushButton#btn_close:hover {
                 background-color: #e02b3c;
             }
-            
+            /* NOVO ESTILO: Botão Recarregar */
+            QPushButton#btn_reload { 
+                background-color: #005090; /* Azul escuro */
+            }
+            QPushButton#btn_reload:hover { 
+                background-color: #0070c0; /* Azul mais claro no hover */
+            }
         """)
         # --- FIM DO BLOCO DE ESTILIZAÇÃO ---
 
@@ -212,21 +218,27 @@ class VersionsDialog(QDialog):
         # 2. QListWidget para Versões
         self.listWidget_versions = QListWidget()
         layout.addWidget(self.listWidget_versions)
+        
+        # 3. Botão Recarregar (Posicionado ANTES do Baixar para melhor UX)
+        self.btn_reload = QPushButton("🔄️ Recarregar Versões")
+        self.btn_reload.setObjectName("btn_reload") # Necessário para o estilo CSS
+        self.btn_reload.clicked.connect(self.load_versions) # CONEXÃO COM O MÉTODO EXISTENTE
+        layout.addWidget(self.btn_reload)
 
-        # 3. Botão Baixar
+        # 4. Botão Baixar
         self.btn_download = QPushButton("Baixar e Substituir")
-        self.btn_download.setObjectName("btn_download") # Necessário para o estilo
+        self.btn_download.setObjectName("btn_download")
         self.btn_download.setEnabled(False) 
         self.btn_download.clicked.connect(self.start_update)
         layout.addWidget(self.btn_download)
 
-        # 4. Label de Status do Download
+        # 5. Label de Status do Download
         self.lbl_status_download = QLabel("Status: Aguardando seleção...")
         layout.addWidget(self.lbl_status_download)
         
-        # 5. Adicionar um botão de Fechar (opcional, mas bom para UX)
+        # 6. Botão de Fechar
         self.btn_close = QPushButton("Fechar")
-        self.btn_close.setObjectName("btn_close") # Necessário para o estilo
+        self.btn_close.setObjectName("btn_close") 
         self.btn_close.clicked.connect(self.accept)
         layout.addWidget(self.btn_close)
 

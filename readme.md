@@ -92,18 +92,29 @@ O gerenciador espera que a API esteja instalada em:
     ├── redis-server.exe         (Servidor Redis)
     └── nssm
         ├── win32
-    ssm.exe
+    nssm.exe
         └── win64
-    ssm.exe       (Versão recomendada para Windows 64 bits)
+    nssm.exe       (Versão recomendada para Windows 64 bits)
 
 ## ▶️ Como Executar o Gerenciador
 
 1.  Instale todas as dependências Python.
 2.  Instale o **Instalador oficial do APIHUB** (disponível no GitHub).
-3.  Abra seu editor (VS Code, PyCharm etc.) **como Administrador**.
+3.  Abra seu editor (VS Code etc.) **como Administrador**.
 4.  Execute o arquivo:
 
-```{=html}
-<!-- -->
 ```
-    python app.py
+python main.py
+```
+
+## Como fazer alterações na interface?
+
+1. Abra o arquivo `main.py`.
+2. Faça as alterações necessárias.
+3. Salve o arquivo.
+4. Execute o arquivo novamente:
+
+```
+python main.py
+```
+
